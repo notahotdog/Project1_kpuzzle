@@ -7,16 +7,13 @@ import sys
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 
+
 class Puzzle(object):
     def __init__(self, init_state, goal_state):
         # you may add more attributes if you think is useful
         self.init_state = init_state
         self.goal_state = goal_state
         self.actions = list()
-
-    def solve(self):
-        #TODO
-        # implement your search algorithm here
 
         '''
         Code Idea:
@@ -37,13 +34,30 @@ class Puzzle(object):
         ij position of 0 (ex: (3, 3))
         method for all possible moves of shifting around 0 
         method for checking goal state - scan through the whole matrix and stop when any number is out of place
+        check if node has been visited 
         parent null - check for initial state
         attribute previous move - to keep track of LEFT, RIGHT
         Another method in Puzzle class, to backtrack, use stack possibly
         Frontier would be a queue
         '''
-        
-        return ["LEFT", "RIGHT"] # sample output 
+
+    class Node:
+        def __init__(self, curr_state, parent, prev_move, position_of_zero):
+            self.currState = curr_state
+            self.parent = parent
+            self.prevMove = prev_move
+            self.positionOfZero = position_of_zero
+
+        def is_goal_state(self):
+            return self.puzzle == Puzzle.goal_state
+
+
+def solve(self):
+    #TODO
+    # implement your search algorithm here
+    # root node
+    root = Puzzle.Node(Puzzle.init_state, None, None, 2)
+    return ["LEFT", "RIGHT"] # sample output
 
     # you may add more functions if you think is useful  
 
