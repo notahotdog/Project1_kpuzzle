@@ -4,6 +4,7 @@
 import os
 import sys
 import math
+from copy import deepcopy
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
@@ -15,42 +16,109 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
 
+        self.total_length = len(init_state) #length of list
+        self.nSize = int(abs(math.sqrt(len(init_state)))) #n definition of matrix
+        self.g = 0
+        
+
+
+
     def solve(self):
         #TODO
         # implement your search algorithm here
         if (not self.solvable()):
             return ["UNSOLVABLE"]
         
-        return ["LEFT", "RIGHT"] # sample output 
+        #need to do solve the puzzle
 
-    
+        path = a_star_search() #list of the path traversed    
+        return path    
+
+        #return ["LEFT", "RIGHT"] # sample output 
+
 
 
 
     # you may add more functions if you think is useful
 
+    
     def a_star_search(self):
-        #pass the goal state and the intial state
-        return True
 
-    def md(self):
-        #evaluate the absolute difference between the two states
+        #pass the goal state and the initial state
 
-        n = int(abs(math.sqrt(len(init_state)))) #returns the number of rows /col
+        queue = collections.deque(init_state) #add the initial state
 
-        #print("debug number of rows/col :", n)
+        while queue:
+            if(solved):
+                return self.actions #can be changed later on
+            
+            else:
+                return False
+                #incorporate action that adds to path
+         
+
+    
+    #checks whether puzzle has been solved - need to ensure values inside are equal
+    def solved(self, tempState):
+        return tempState == self.goal_state
+
+    #number of steps taken to get to current state
+    def g(self):
+        return g 
+
+    #manhattan distance to get to next state
+    def h(self):
+        return self.manhattan_distance
+    
+    #will calculate the score for a particular heuristic
+    def fscore(self):
+        return self.g + self.h
+
+    def validActions(self):
+
+        temp_copy = copy.deepcopy(init_state) #makes a copy of the initial state
+
+        coordinates = findZero(temp_copy)
+        xVal = coordinates[0]
+        yVal = coordinates[1]
+
+        valid_actions = ["U","D","L","R"]
+
+        boundary = nSize - 1 
+        if(xVal == 0): valid_actions.remove("L")
+        if(xVal == boundary): valid_actions.remove("R")
+        if(yVal == 0): valid_actions.remove("U")
+        if(yVal == boundary): valid_actions.remove("D") 
+
+        return valid_actions
+
+    
+    #returns a pair that indicates the x and y of 0
+    def findZero(state):
+        xCtr = 0
+        yCtr = 0
+
+        for x in range(total_length):
+            if(xCtr == nSize): #nSize == 3 
+                yCtr += 1
+                xCtr = 0 
+            
+            if(state[x] == 0):
+                break
+            xCtr += 1
+        return xCtr,yCtr
+            
+
+
+    #might need to modify code to compare against the 2 states instead of inital.self state and goal state.
+    def manhattan_distance(self):
+
+        n = self.nSize
+        print("size of n :", n)
         
-        manhattan_distance = 0
-        count = 0
-        while count <= n:
-            ini_col = abs(self.init_state % n)
-            ini_row = abs(self.init_state / n)
-            goal_col = abs(self.goal_state % n)
-            goal_row = abs(self.goal_state / n)
+        manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.init_state.index(i), self.goal_state.index(i)) for i in range(0, n+1))) #need to double check the manhattan distance heuristic for accuracy
 
-            manhattan_distance += (abs(ini_col-goal_col) +  abs(ini_row - ini_col))
-            count += 1
-        
+        #print("Manhattan distance: ", manhattan_distance) 
         return manhattan_distance
 
 

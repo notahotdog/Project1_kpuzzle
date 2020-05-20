@@ -1,5 +1,56 @@
-#manhattan distance debug
+
+#valid actions debug
+
 import math
+import copy
+somelist = [1,2,3,4,5,6,7,8,0]
+total_length = len(somelist)
+nSize = int(abs(math.sqrt(len(somelist)))) #n definition of matrix
+
+
+
+
+def validActions(somelist):
+
+        temp_copy = copy.deepcopy(somelist) #makes a copy of the initial state
+        #check boundary 
+        coordinates = findZero(temp_copy)
+        xVal = coordinates[0]
+        yVal = coordinates[1]
+        #evaluated case conditions
+
+        valid_actions = ["U","D","L","R"]
+
+        boundary = nSize - 1 
+        if(xVal == 0): valid_actions.remove("L")
+        if(xVal == boundary): valid_actions.remove("R")
+        if(yVal == 0): valid_actions.remove("U")
+        if(yVal == boundary): valid_actions.remove("D") 
+
+        return valid_actions
+
+    
+    #returns a pair that indicates the x and y of 0
+def findZero(state):
+  xCtr = 0
+  yCtr = 0
+
+  for x in range(total_length):
+    if(xCtr == nSize): #nSize == 3 
+      yCtr += 1
+      xCtr = 0 
+            
+    if(state[x] == 0):
+      break
+    xCtr += 1
+  return xCtr,yCtr
+
+lis = validActions(somelist)
+print(lis)
+
+'''
+
+Manhattan distance code - final
 init_state = [1,2,3,4,5,0,6,7,8]
 goal_state = [1,2,3,4,5,6,7,8,0]
 
@@ -16,6 +67,7 @@ manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) f
 print("Manhattan distance: ", manhattan_distance)
 
 
+'''
 '''
 for istate, gstate in ((init_state.index(i),goal_state.index(i)) for i in range(0,n):
 manhattan_distance += (abs(istate%n - gstate%n) + abs(istate//n - gstate//n))
