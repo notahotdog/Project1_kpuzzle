@@ -124,7 +124,7 @@ class Node:
         self.curr_state = curr_state
         self.parent = parent
         self.prev_move = prev_move
-        self.position_of_zero = zero_position
+        self.zero_position = zero_position
 
 
 if __name__ == "__main__":
