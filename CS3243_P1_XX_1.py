@@ -13,53 +13,119 @@ class Puzzle(object):
         # you may add more attributes if you think is useful
         self.init_state = init_state
         self.goal_state = goal_state
+        self.size = len(init_state)
         self.actions = list()
 
-        '''
-        Code Idea:
-        [[2, 3, 6],
-        [1, 5, 8],
-        [4, 7, 0]]
+    def solve(self):
+        # TODO
+        # implement your search algorithm here
 
-        [[2, 3, 6],
-        [1, 5, 8],
-        [4, 0, 7]]
+        # Check if puzzle is solvable
+        if (not self.solvable()):
+            return ["UNSOLVABLE"]
 
-        [[2, 3, 6],
-        [1, 5, 0],
-        [4, 7, 8]]
+        # Initializing root node, frontier, and explored set of nodes
+        zero_pos = self.find_zero()
+        root = Node(self.init_state, None, None, zero_pos)
+        frontier = list(root)
+        explored = dict()
 
-        # Node class:
-        2D matrix
-        ij position of 0 (ex: (3, 3))
-        method for all possible moves of shifting around 0 
-        method for checking goal state - scan through the whole matrix and stop when any number is out of place
-        check if node has been visited 
-        parent null - check for initial state
-        attribute previous move - to keep track of LEFT, RIGHT
-        Another method in Puzzle class, to backtrack, use stack possibly
-        Frontier would be a queue
-        '''
+        if (self.is_goal_state(root)):
+            return []
 
-    class Node:
-        def __init__(self, curr_state, parent, prev_move, position_of_zero):
-            self.currState = curr_state
-            self.parent = parent
-            self.prevMove = prev_move
-            self.positionOfZero = position_of_zero
+        while (frontier):
+            node = frontier.pop(0)
 
-        def is_goal_state(self):
-            return self.puzzle == Puzzle.goal_state
+            hash_num = hash(node.curr_state)
+            explored[hash_num] = node.curr_state
+            
+            row = node.zero_position[0]
+            col = node.zero_position[1]
 
+            # LEFT
+            if (row != 0):
+                # getting the next state
+                next_state = node.curr_state # needs to be changed
+                child_left = Node(next_state, node, "LEFT", (row - 1, col))
+                key = hash(next_state)
+                if (key not in explored):
+                    if (self.is_goal_state(child_left)):
+                        # goal state reached, need to backtrack
+                        print("goal state reached")
+                        break
+                    else:     
+                        frontier.append(child_left)
 
-def solve(self):
-    #TODO
-    # implement your search algorithm here
-    # root node
-    root = Puzzle.Node(Puzzle.init_state, None, None, 2)
-    return ["LEFT", "RIGHT"] # sample output
+            # RIGHT
+            if (row != self.size):
+                # getting the next state
+                next_state = node.curr_state # needs to be changed
+                child_right = Node(next_state, node, "RIGHT", (row + 1, col))
+                key = hash(next_state)
+                if (key not in explored):
+                    if (self.is_goal_state(child_right)):
+                        # goal state reached, need to backtrack
+                        print("goal state reached")
+                        break
+                    else:     
+                        frontier.append(child_right)
 
-    # you may add more functions if you think is useful  
+            # UP
+            if (col != 0):
+                # getting the next state
+                next_state = node.curr_state # needs to be changed
+                child_up = Node(next_state, node, "UP", (row, col - 1))
+                key = hash(next_state)
+                if (key not in explored):
+                    if (self.is_goal_state(child_up)):
+                        # goal state reached, need to backtrack
+                        print("goal state reached")
+                        break
+                    else:     
+                        frontier.append(child_up)
+
+            # DOWN    
+            if (col != self.size):
+                # getting the next state
+                next_state = node.curr_state # needs to be changed
+                child_down = Node(next_state, node, "DOWN", (row, col + 1))
+                key = hash(next_state)
+                if (key not in explored):
+                    if (self.is_goal_state(child_down)):
+                        # goal state reached, need to backtrack
+                        print("goal state reached")
+                        break
+                    else:     
+                        frontier.append(child_down)
+
+        return ["LEFT", "RIGHT"]  # sample output
+
+    # you may add more functions if you think is useful
+
+    # yet to implement solvable function
+    def solvable(self):
+        return True
+
+    def find_zero(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if (self.init_state[i, j] == 0):
+                    return (i, j)    
+    
+    def is_goal_state(self, state):
+        for i in range(self.size):
+            for j in range(self.size):
+                if (state[i][j] != self.init_state[i][j]):
+                    return False
+        return True            
+
+class Node:
+    def __init__(self, curr_state, parent, prev_move, zero_position):
+        self.curr_state = curr_state
+        self.parent = parent
+        self.prev_move = prev_move
+        self.position_of_zero = zero_position
+
 
 if __name__ == "__main__":
     # do NOT modify below
@@ -104,10 +170,6 @@ if __name__ == "__main__":
         goal_state[(i-1)//n][(i-1)%n] = i
     goal_state[n - 1][n - 1] = 0
 
-    print(init_state)
-    print("")
-    print(goal_state)
-
     puzzle = Puzzle(init_state, goal_state)
     ans = puzzle.solve()
 
@@ -115,9 +177,28 @@ if __name__ == "__main__":
         for answer in ans:
             f.write(answer+'\n')            
 
+'''
+Code Idea:
+[[2, 3, 6],
+[1, 5, 8],
+[4, 7, 0]]
 
+[[2, 3, 6],
+[1, 5, 8],
+[4, 0, 7]]
 
+[[2, 3, 6],
+[1, 5, 0],
+[4, 7, 8]]
 
-
-
-
+# Node class:
+2D matrix
+ij position of 0 (ex: (3, 3))
+method for all possible moves of shifting around 0 
+method for checking goal state - scan through the whole matrix and stop when any number is out of place
+check if node has been visited 
+parent null - check for initial state
+attribute previous move - to keep track of LEFT, RIGHT
+Another method in Puzzle class, to backtrack, use stack possibly
+Frontier would be a queue
+'''
