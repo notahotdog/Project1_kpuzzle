@@ -3,6 +3,7 @@
 
 import os
 import sys
+import math
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
@@ -22,7 +23,38 @@ class Puzzle(object):
         
         return ["LEFT", "RIGHT"] # sample output 
 
+    
+
+
+
     # you may add more functions if you think is useful
+
+    def a_star_search(self):
+        #pass the goal state and the intial state
+        return True
+
+    def md(self):
+        #evaluate the absolute difference between the two states
+
+        n = int(abs(math.sqrt(len(init_state)))) #returns the number of rows /col
+
+        #print("debug number of rows/col :", n)
+        
+        manhattan_distance = 0
+        count = 0
+        while count <= n:
+            ini_col = abs(self.init_state % n)
+            ini_row = abs(self.init_state / n)
+            goal_col = abs(self.goal_state % n)
+            goal_row = abs(self.goal_state / n)
+
+            manhattan_distance += (abs(ini_col-goal_col) +  abs(ini_row - ini_col))
+            count += 1
+        
+        return manhattan_distance
+
+
+
     def count_inv(self, n):
         cpy = []
         count = 0
