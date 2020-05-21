@@ -18,6 +18,37 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
 
+    def astarsearch(self):
+
+        #pass the goal state and the initial state
+
+        queue = collections.deque([Node(init_state,goal_state,0,"N")]) #add the initial state
+        #seen = set()
+        #seen.add()
+
+        while queue:
+
+            #sort the deque
+            queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore))
+
+            tempNode = queue.popleft()
+            self.actions.append(tempNode.actionType)
+
+
+            if(self.solved(self.init_state)):
+                return self.actions #can be changed later on
+            
+            else:
+
+                #create a new node to be added into the queue to be decremented from
+                #tempNode.valid_action
+                actionCheck = tempNode.valid_action #all available actions
+                for i in actionCheck:
+                    #create a modified node
+                    newNode = Node(tempNode.actionSwap(tempNode,i),goal_state,tempNode.inc_g,i)
+                    queue.appendleft(newNode) 
+
+
     def solve(self):
         #TODO
         # implement your search algorithm here
@@ -26,7 +57,7 @@ class Puzzle(object):
         
         #need to do solve the puzzle
 
-        path = a_star_search() #list of the path traversed    
+        path = self.astarsearch() #list of the path traversed    
         return path    
 
         #return ["LEFT", "RIGHT"] # sample output 
@@ -67,32 +98,7 @@ class Puzzle(object):
                     return n - i
 
 
-    def a_star_search(self):
-
-        #pass the goal state and the initial state
-
-        queue = collections.deque(Node(init_state,goal_state,0)) #add the initial state
-
-        while queue:
-
-            tempNode = queue.popLeft()
-
-            if(solved(self.init_state)):
-                return self.actions #can be changed later on
-            
-            else:
-
-                #create a new node to be added into the queue to be decremented from
-                actionCheck = tempNode.validActions #all available actions
-                for i in actionCheck:
-                    #create a modified node
-                Node(tempNode)
-
-
-
-                return False
-                #incorporate action that adds to path
-
+    
     #checks whether puzzle has been solved - need to ensure values inside are equal
     def solved(self, tempState):
         return tempState == self.goal_state     
@@ -100,13 +106,52 @@ class Puzzle(object):
 class  Node(object):
     
 
-    def __init__(self, initial_state,goal_state,g): #initial state and the g value
+    def __init__(self, initial_state,goal_state,g,action): #initial state and the g value
+        self.initial_state = initial_state
         # you may add more attributes if you think is useful
         self.total_length = len(initial_state) #length of list
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = 0; 
-        self.zeroCoordinates = initial_state.findZeroCoordinates(initial_state) 
+        type(initial_state)
+        self.zeroCoordinates = self.findZeroCoordinates
+        self.action = action #actionType 
+        self.valid_actions = self.validActions
 
+
+    def actionSwap(modList,direction):
+        zval = modList.index(0)
+        if(direction == "U"):
+            print("UP")
+            tempval = modList[zval-nSize]
+            print("tempval :", tempval)
+            modList[zval] = tempval
+            modList[zval-nSize] = 0
+        
+        elif (direction == "D"):
+            print("DOWN")
+            tempval = modList[zval+nSize]
+            print("tempval :", tempval)
+            modList[zval] = tempval
+            modList[zval+nSize] = 0
+        
+        elif (direction == "R"):
+            print("RIGHT")
+            tempval = modList[zval+1]
+            print("tempval :", tempval)
+            modList[zval] = tempval
+            modList[zval+1] = 0
+        
+        elif (direction == "L"):
+            print("LEFT")
+            tempval = modList[zval+1]
+            print("tempval :", tempval)
+            modList[zval] = tempval
+            modList[zval-1] = 0
+
+        return modList
+        
+    def actionType(self):
+        return self.action
 
 
     #number of steps taken to get to current state
@@ -141,11 +186,12 @@ class  Node(object):
         if(yVal == 0): valid_actions.remove("U")
         if(yVal == boundary): valid_actions.remove("D") 
 
-        return valid_actions
+        return self.valid_actions
 
     
     #returns a pair that indicates the x and y of 0
-    def findZeroCoordinates(state):
+    def findZeroCoordinates(self):
+        somelist = self.initial_state
         xCtr = 0
         yCtr = 0
 
@@ -154,7 +200,7 @@ class  Node(object):
                 yCtr += 1
                 xCtr = 0 
             
-            if(state[x] == 0):
+            if(somelist[x] == 0):
                 break
             xCtr += 1
         return xCtr,yCtr

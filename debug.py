@@ -40,8 +40,11 @@ def actionSwap(somelist,direction):
     somelist[zval-1] = 0
   return somelist
 
-swappedlist = actionSwap(somelist,"D")
-print(swappedlist)
+listActions = ["D","R"]
+for i in listActions:
+  swappedlist = actionSwap(somelist,i)
+
+  print(swappedlist)
 
 
 
