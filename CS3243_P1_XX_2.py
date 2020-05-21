@@ -40,6 +40,7 @@ class Puzzle(object):
             
             else:
 
+                #todo - sort out action list
                 #create a new node to be added into the queue to be decremented from
                 #tempNode.valid_action
                 actionCheck = tempNode.valid_action #all available actions
@@ -113,9 +114,9 @@ class  Node(object):
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = 0; 
         type(initial_state)
-        self.zeroCoordinates = self.findZeroCoordinates
+        self.zeroCoordinates = self.findZeroCoordinates()
         self.action = action #actionType 
-        self.valid_actions = self.validActions
+        self.valid_actions = self.validActions()
 
 
     def actionSwap(modList,direction):
@@ -169,24 +170,28 @@ class  Node(object):
     def fscore(self):
         return self.g + self.h
 
+
+    def valid_action(self):
+        return self.valid_action
+
     def validActions(self):
 
         #temp_copy = copy.deepcopy(init_state) #makes a copy of the initial state
         #coordinates = findZeroCoordinates(temp_copy)
 
-        coordinates = zeroCoordinates
+        coordinates = self.zeroCoordinates
         xVal = coordinates[0]
         yVal = coordinates[1]
 
         valid_actions = ["U","D","L","R"]
 
-        boundary = nSize - 1 
+        boundary = self.nSize - 1 
         if(xVal == 0): valid_actions.remove("L")
         if(xVal == boundary): valid_actions.remove("R")
         if(yVal == 0): valid_actions.remove("U")
         if(yVal == boundary): valid_actions.remove("D") 
 
-        return self.valid_actions
+        return valid_actions
 
     
     #returns a pair that indicates the x and y of 0
@@ -195,8 +200,8 @@ class  Node(object):
         xCtr = 0
         yCtr = 0
 
-        for x in range(total_length):
-            if(xCtr == nSize): #nSize == 3 
+        for x in range(self.total_length):
+            if(xCtr == self.nSize): #nSize == 3 
                 yCtr += 1
                 xCtr = 0 
             
