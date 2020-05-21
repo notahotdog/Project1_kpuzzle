@@ -1,4 +1,51 @@
 
+#DEBUG actionGeneration
+#generates the list for the various actions
+
+import math
+
+somelist = [1,2,3,4,0,6,7,8,9]
+total_length = len(somelist)
+nSize = int(abs(math.sqrt(len(somelist)))) #n definition of matrix
+
+
+def actionSwap(somelist,direction):
+  zval = somelist.index(0)
+  if(direction == "U"):
+    print("UP")
+    tempval = somelist[zval-nSize]
+    print("tempval :", tempval)
+    somelist[zval] = tempval
+    somelist[zval-nSize] = 0
+
+  elif (direction == "D"):
+    print("DOWN")
+    tempval = somelist[zval+nSize]
+    print("tempval :", tempval)
+    somelist[zval] = tempval
+    somelist[zval+nSize] = 0
+  
+  elif (direction == "R"):
+    print("RIGHT")
+    tempval = somelist[zval+1]
+    print("tempval :", tempval)
+    somelist[zval] = tempval
+    somelist[zval+1] = 0
+
+  elif (direction == "L"):
+    print("LEFT")
+    tempval = somelist[zval+1]
+    print("tempval :", tempval)
+    somelist[zval] = tempval
+    somelist[zval-1] = 0
+  return somelist
+
+swappedlist = actionSwap(somelist,"D")
+print(swappedlist)
+
+
+
+'''
 #valid actions debug
 
 import math
@@ -47,7 +94,7 @@ def findZero(state):
 
 lis = validActions(somelist)
 print(lis)
-
+'''
 '''
 
 Manhattan distance code - final

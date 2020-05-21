@@ -83,8 +83,9 @@ class Puzzle(object):
             else:
 
                 #create a new node to be added into the queue to be decremented from
-                #check all the possible actions for this node
-                actionCheck = tempNode.validActions
+                actionCheck = tempNode.validActions #all available actions
+                for i in actionCheck:
+                    #create a modified node
                 Node(tempNode)
 
 
@@ -97,12 +98,17 @@ class Puzzle(object):
         return tempState == self.goal_state     
 
 class  Node(object):
+    
+
     def __init__(self, initial_state,goal_state,g): #initial state and the g value
         # you may add more attributes if you think is useful
         self.total_length = len(initial_state) #length of list
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = 0; 
-        
+        self.zeroCoordinates = initial_state.findZeroCoordinates(initial_state) 
+
+
+
     #number of steps taken to get to current state
     def g(self):
         return g 
@@ -120,9 +126,10 @@ class  Node(object):
 
     def validActions(self):
 
-        temp_copy = copy.deepcopy(init_state) #makes a copy of the initial state
+        #temp_copy = copy.deepcopy(init_state) #makes a copy of the initial state
+        #coordinates = findZeroCoordinates(temp_copy)
 
-        coordinates = findZeroCoordinates(temp_copy)
+        coordinates = zeroCoordinates
         xVal = coordinates[0]
         yVal = coordinates[1]
 
