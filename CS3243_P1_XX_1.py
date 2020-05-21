@@ -16,6 +16,7 @@ class Puzzle(object):
         self.size = len(init_state)
         self.actions = list()
 
+
     def solve(self):
         # TODO
         # implement your search algorithm here
@@ -102,9 +103,42 @@ class Puzzle(object):
 
     # you may add more functions if you think is useful
 
-    # yet to implement solvable function
+    '''
+    1. If the grid width is odd, then the number of inversions in a solvable situation is even.
+    2. If the grid width is even, and the blank is on an even row counting from the bottom, 
+    then the number of inversions in a solvable situation is odd.
+    3. If the grid width is even, and the blank is on an odd row counting from the bottom 
+    then the number of inversions in a solvable situation is even.
+    '''
+    # returns if an n by n puzzle is solvable
     def solvable(self):
-        return True
+        cpy = []
+        inversions = 0
+        for i in range(self.size):
+            cpy.extend(self.init_state[i])
+        for i in range(self.size**2):
+            for j in range(i + 1, self.size**2):
+                if ((cpy[i] > cpy[j]) and (cpy[j] != 0)):
+                    inversions += 1
+
+        if (self.size % 2 == 1 and inversions % 2 == 0):
+            return True
+        elif (self.size % 2 == 0):
+            row = self.find_zero()[1] - self.size
+            if (inversions % 2 == 0):
+                if (row % 2 == 1):
+                    return True
+            else:
+                if (row % 2 == 0):
+                    return True
+        return False
+        return num_of_inversions % 2 == 0
+
+    # returns void and adds the prev moves directly onto actions in Puzzle instance
+    def backtrack(self, node):
+        while(node.parent != None):
+            self.actions.insert(0, node.prev_move)
+            node = node.parent
 
     def find_zero(self):
         for i in range(self.size):
