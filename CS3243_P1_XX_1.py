@@ -3,7 +3,7 @@
 
 import copy
 import os
-from Queue import PriorityQueue # its queue in Python3, but assignment using Python 2.7
+# from Queue import PriorityQueue # its queue in Python3, but assignment using Python 2.7
 import sys
 
 # Running script on your own - given code can be run with the command:
@@ -29,16 +29,16 @@ class Puzzle(object):
 
         # Initializing root node, frontier, and explored set of nodes
         zero_pos = self.find_zero()
-        root = Node(self.init_state, None, None, zero_pos, 0)
-        frontier = PriorityQueue()
-        frontier.put((root.cost, root))
+        root = Node(self.init_state, None, None, zero_pos)
+        frontier = list()
+        frontier.append(root)
         explored = dict()
 
-        if (self.is_goal_state(root)):
+        if (self.is_goal_state(root.curr_state)):
             return []
 
-        while (not frontier.empty()):
-            node = frontier.get()
+        while (not frontier):
+            node = frontier.pop(0)
 
             hash_num = hash(node.curr_state)
             explored[hash_num] = node.curr_state
@@ -54,15 +54,14 @@ class Puzzle(object):
                 next_state[row][col + 1] = 0
                 next_state[row][col] = number_to_swap
 
-                child = Node(next_state, node, "LEFT", (row, col + 1), node.cost + 1)
+                child = Node(next_state, node, "LEFT", (row, col + 1))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child)):
                         # goal state reached, need to backtrack
-                        print("goal state reached")
-                        break
+                        return self.backtrack(child)
                     else:     
-                        frontier.put((child.cost, child))
+                        frontier.append(child)
             
             # RIGHT
             if (col != 0):
@@ -72,15 +71,14 @@ class Puzzle(object):
                 next_state[row][col - 1] = 0
                 next_state[row][col] = number_to_swap
 
-                child = Node(next_state, node, "RIGHT", (row, col - 1), node.cost + 1)
+                child = Node(next_state, node, "RIGHT", (row, col - 1))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child)):
                         # goal state reached, need to backtrack
-                        print("goal state reached")
-                        break
+                        return self.backtrack(child)
                     else:     
-                        frontier.put((child.cost, child))
+                        frontier.append(child)
 
             # UP
             if (row != self.size - 1):
@@ -90,15 +88,13 @@ class Puzzle(object):
                 next_state[row + 1][col] = 0
                 next_state[row][col] = number_to_swap
 
-                child = Node(next_state, node, "UP", (row + 1, col), node.cost + 1)
+                child = Node(next_state, node, "UP", (row + 1, col))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child)):
-                        # goal state reached, need to backtrack
-                        print("goal state reached")
-                        break
+                        return self.backtrack(child)
                     else:     
-                        frontier.put((child.cost, child))
+                        frontier.append(child)
 
             # DOWN    
             if (row != 0):
@@ -108,17 +104,16 @@ class Puzzle(object):
                 next_state[row - 1][col] = 0
                 next_state[row][col] = number_to_swap
 
-                child = Node(next_state, node, "DOWN", (row - 1, col), node.cost + 1)
+                child = Node(next_state, node, "DOWN", (row - 1, col))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child)):
-                        # goal state reached, need to backtrack
-                        print("goal state reached")
-                        break
+                        return self.backtrack(child)
                     else:     
-                        frontier.put((child.cost, child))
-
-        return ["LEFT", "RIGHT"]  # sample output
+                        frontier.append(child)
+        
+        return ["UNSOLVABLE"]
+        # return ["LEFT", "RIGHT"]  # sample output
 
     # you may add more functions if you think is useful
 
@@ -151,21 +146,23 @@ class Puzzle(object):
                 if (row % 2 == 0):
                     return True
         return False
-        return num_of_inversions % 2 == 0 # there is an error on this line...what is being returned?
 
     # returns void and adds the prev moves directly onto actions in Puzzle instance
     def backtrack(self, node):
+        result = list()
         while(node.parent != None):
-            self.actions.insert(0, node.prev_move)
+            result.insert(0, node.prev_move)
             node = node.parent
+        return result
 
     def find_zero(self):
         for i in range(self.size):
             for j in range(self.size):
-                if (self.init_state[i, j] == 0):
+                if (self.init_state[i][j] == 0):
                     return (i, j)    
     
     def is_goal_state(self, state):
+        # can just directly equate matrices change later
         for i in range(self.size):
             for j in range(self.size):
                 if (state[i][j] != self.goal_state[i][j]):
@@ -173,12 +170,11 @@ class Puzzle(object):
         return True            
 
 class Node:
-    def __init__(self, curr_state, parent, prev_move, zero_position, cost):
+    def __init__(self, curr_state, parent, prev_move, zero_position):
         self.curr_state = curr_state
         self.parent = parent
         self.prev_move = prev_move
         self.zero_position = zero_position
-        self.cost = cost
 
 
 if __name__ == "__main__":
