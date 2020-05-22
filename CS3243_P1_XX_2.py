@@ -7,6 +7,7 @@ import math
 from copy import deepcopy
 import collections
 import copy
+from itertools import chain
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
@@ -14,15 +15,22 @@ import copy
 class Puzzle(object):
     def __init__(self, init_state, goal_state):
         # you may add more attributes if you think is useful
+
         self.init_state = init_state
         self.goal_state = goal_state
-        self.actions = list()
+        self.actions = []
+        
+        #self.actions = list()
 
     def astarsearch(self):
 
         #pass the goal state and the initial state
+        self.init_state = list(chain.from_iterable(init_state)) #flattens the list
+        
+        print("Flattened list: ", self.init_state)
 
-        queue = collections.deque([Node(init_state,goal_state,0,"N")]) #add the initial state
+
+        queue = collections.deque([Node(self.init_state,goal_state,0,"N")]) #add the initial state
         #seen = set()
         #seen.add()
 
@@ -32,22 +40,54 @@ class Puzzle(object):
             queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore))
 
             tempNode = queue.popleft()
-            self.actions.append(tempNode.actionType)
-
+            self.debugNode(tempNode) #node to be assessed
+            self.actions.append(tempNode.actionType) #add to list of actions attempted
 
             if(self.solved(self.init_state)):
                 return self.actions #can be changed later on
             
             else:
 
-                #todo - sort out action list
                 #create a new node to be added into the queue to be decremented from
-                #tempNode.valid_action
-                actionCheck = tempNode.valid_action #all available actions
+                actionCheck = tempNode.validActions() #all available actions for the node being assessed
+                self.debugActions(actionCheck)
+
                 for i in actionCheck:
                     #create a modified node
-                    newNode = Node(tempNode.actionSwap(tempNode,i),goal_state,tempNode.inc_g,i)
+                    #modifiedNode = tempNode.actionSwap(i)
+                    #newNode = Node(modifiedNode,goal_state,tempNode.inc_g,i)
+                    newNode = Node(tempNode.actionSwap(i),goal_state,tempNode.inc_g,i)
+
                     queue.appendleft(newNode) 
+    
+    #DEBUGS the contents of the node
+    def debugNode(self,node):
+        print("")
+        print("-------")
+        print("DEBUG NODE: ")
+        #print("     -i State:", node.initial_state, " g val: ", node.g, " action: ", node.action)
+        print(" Initial State: ")
+        node.debugMatrix(node.initial_state)
+        print(" g val: ", node.g, " action: ", node.action)
+        
+
+        
+
+    #debug actions allows to check whether the action is in the action list
+    def debugActions(self, *args):
+        print("DEBUG: ")
+        if len(args) == 0:
+            print (" PATH for solution")
+            for x in self.actions:
+                print(x)
+        
+        elif len(args) == 1:
+            print("actionChecks to be evaluated:")
+            actionCheck = args[0]
+            print(actionCheck)
+
+#            for x in actionCheck:
+#                print(x)
 
 
     def solve(self):
@@ -113,47 +153,59 @@ class  Node(object):
         self.total_length = len(initial_state) #length of list
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = 0; 
-        type(initial_state)
+        #type(initial_state)
         self.zeroCoordinates = self.findZeroCoordinates()
         self.action = action #actionType 
-        self.valid_actions = self.validActions()
+        #self.valid_actions = self.validActions()
 
 
-    def actionSwap(modList,direction):
-        zval = modList.index(0)
+    #Takes in a node to be swapped and the direction of the swap
+    def actionSwap(self,direction):
+        print(" ")
+        print("actionSwap Initial state:", self.initial_state)
+        zval = self.initial_state.index(0)
+        nSize = self.nSize
+        #modList is the list of actions 
+        modList = copy.deepcopy(self.initial_state) #makes a copy of the initial state
+        #modList = self.initial_state #list to be modified
         if(direction == "U"):
             print("UP")
             tempval = modList[zval-nSize]
-            print("tempval :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-nSize] = 0
         
         elif (direction == "D"):
             print("DOWN")
             tempval = modList[zval+nSize]
-            print("tempval :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+nSize] = 0
         
         elif (direction == "R"):
             print("RIGHT")
             tempval = modList[zval+1]
-            print("tempval :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+1] = 0
         
         elif (direction == "L"):
             print("LEFT")
-            tempval = modList[zval+1]
-            print("tempval :", tempval)
+            tempval = modList[zval-1]
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-1] = 0
 
+        print(" updated Matrix: ")
+        self.debugMatrix(modList)
         return modList
         
     def actionType(self):
         return self.action
 
+    def debugMatrix(self,matrix):
+        print('\n'.join(' '.join(map(str, matrix[i:i+n])) for i in range(0, len(matrix), n)))
+        
 
     #number of steps taken to get to current state
     def g(self):
@@ -171,8 +223,8 @@ class  Node(object):
         return self.g + self.h
 
 
-    def valid_action(self):
-        return self.valid_action
+    #def valid_actions(self):
+    #    return self.valid_actions
 
     def validActions(self):
 
@@ -191,7 +243,9 @@ class  Node(object):
         if(yVal == 0): valid_actions.remove("U")
         if(yVal == boundary): valid_actions.remove("D") 
 
-        return valid_actions
+        return  valid_actions
+        #return None
+        #return valid_actions
 
     
     #returns a pair that indicates the x and y of 0
