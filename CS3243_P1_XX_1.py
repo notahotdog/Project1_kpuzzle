@@ -1,6 +1,7 @@
 # CS3243 Introduction to Artificial Intelligence
 # Project 1: k-Puzzle
 
+import copy
 import os
 import sys
 
@@ -44,10 +45,32 @@ class Puzzle(object):
             col = node.zero_position[1]
 
             # LEFT
-            if (row != 0):
+            if (col != self.size - 1):
                 # getting the next state
-                next_state = node.curr_state # needs to be changed
-                child_left = Node(next_state, node, "LEFT", (row - 1, col))
+                next_state = copy.deepcopy(node.curr_state)
+                number_to_swap = next_state[row][col + 1]
+                next_state[row][col + 1] = 0
+                next_state[row][col] = number_to_swap
+
+                child_right = Node(next_state, node, "LEFT", (row, col + 1))
+                key = hash(next_state)
+                if (key not in explored):
+                    if (self.is_goal_state(child_right)):
+                        # goal state reached, need to backtrack
+                        print("goal state reached")
+                        break
+                    else:     
+                        frontier.append(child_right)
+            
+            # RIGHT
+            if (col != 0):
+                # getting the next state
+                next_state = copy.deepcopy(node.curr_state)
+                number_to_swap = next_state[row][col - 1]
+                next_state[row][col - 1] = 0
+                next_state[row][col] = number_to_swap
+
+                child_left = Node(next_state, node, "RIGHT", (row, col - 1))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child_left)):
@@ -57,25 +80,15 @@ class Puzzle(object):
                     else:     
                         frontier.append(child_left)
 
-            # RIGHT
-            if (row != self.size):
-                # getting the next state
-                next_state = node.curr_state # needs to be changed
-                child_right = Node(next_state, node, "RIGHT", (row + 1, col))
-                key = hash(next_state)
-                if (key not in explored):
-                    if (self.is_goal_state(child_right)):
-                        # goal state reached, need to backtrack
-                        print("goal state reached")
-                        break
-                    else:     
-                        frontier.append(child_right)
-
             # UP
-            if (col != 0):
+            if (row != self.size - 1):
                 # getting the next state
-                next_state = node.curr_state # needs to be changed
-                child_up = Node(next_state, node, "UP", (row, col - 1))
+                next_state = copy.deepcopy(node.curr_state)
+                number_to_swap = next_state[row + 1][col]
+                next_state[row + 1][col] = 0
+                next_state[row][col] = number_to_swap
+
+                child_up = Node(next_state, node, "UP", (row + 1, col))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child_up)):
@@ -86,10 +99,14 @@ class Puzzle(object):
                         frontier.append(child_up)
 
             # DOWN    
-            if (col != self.size):
+            if (row != 0):
                 # getting the next state
-                next_state = node.curr_state # needs to be changed
-                child_down = Node(next_state, node, "DOWN", (row, col + 1))
+                next_state = copy.deepcopy(node.curr_state)
+                number_to_swap = next_state[row - 1][col]
+                next_state[row - 1][col] = 0
+                next_state[row][col] = number_to_swap
+
+                child_down = Node(next_state, node, "DOWN", (row - 1, col))
                 key = hash(next_state)
                 if (key not in explored):
                     if (self.is_goal_state(child_down)):
@@ -132,7 +149,7 @@ class Puzzle(object):
                 if (row % 2 == 0):
                     return True
         return False
-        return num_of_inversions % 2 == 0
+        return num_of_inversions % 2 == 0 # there is an error on this line...what is being returned?
 
     # returns void and adds the prev moves directly onto actions in Puzzle instance
     def backtrack(self, node):
