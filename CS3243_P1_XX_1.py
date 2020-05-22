@@ -3,6 +3,7 @@
 
 import copy
 import os
+from Queue import PriorityQueue # its queue in Python3, but assignment using Python 2.7
 import sys
 
 # Running script on your own - given code can be run with the command:
@@ -28,15 +29,16 @@ class Puzzle(object):
 
         # Initializing root node, frontier, and explored set of nodes
         zero_pos = self.find_zero()
-        root = Node(self.init_state, None, None, zero_pos)
-        frontier = list(root)
+        root = Node(self.init_state, None, None, zero_pos, 0)
+        frontier = PriorityQueue()
+        frontier.put((root.cost, root))
         explored = dict()
 
         if (self.is_goal_state(root)):
             return []
 
-        while (frontier):
-            node = frontier.pop(0)
+        while (not frontier.empty()):
+            node = frontier.get()
 
             hash_num = hash(node.curr_state)
             explored[hash_num] = node.curr_state
@@ -52,15 +54,15 @@ class Puzzle(object):
                 next_state[row][col + 1] = 0
                 next_state[row][col] = number_to_swap
 
-                child_right = Node(next_state, node, "LEFT", (row, col + 1))
+                child = Node(next_state, node, "LEFT", (row, col + 1), node.cost + 1)
                 key = hash(next_state)
                 if (key not in explored):
-                    if (self.is_goal_state(child_right)):
+                    if (self.is_goal_state(child)):
                         # goal state reached, need to backtrack
                         print("goal state reached")
                         break
                     else:     
-                        frontier.append(child_right)
+                        frontier.put((child.cost, child))
             
             # RIGHT
             if (col != 0):
@@ -70,15 +72,15 @@ class Puzzle(object):
                 next_state[row][col - 1] = 0
                 next_state[row][col] = number_to_swap
 
-                child_left = Node(next_state, node, "RIGHT", (row, col - 1))
+                child = Node(next_state, node, "RIGHT", (row, col - 1), node.cost + 1)
                 key = hash(next_state)
                 if (key not in explored):
-                    if (self.is_goal_state(child_left)):
+                    if (self.is_goal_state(child)):
                         # goal state reached, need to backtrack
                         print("goal state reached")
                         break
                     else:     
-                        frontier.append(child_left)
+                        frontier.put((child.cost, child))
 
             # UP
             if (row != self.size - 1):
@@ -88,15 +90,15 @@ class Puzzle(object):
                 next_state[row + 1][col] = 0
                 next_state[row][col] = number_to_swap
 
-                child_up = Node(next_state, node, "UP", (row + 1, col))
+                child = Node(next_state, node, "UP", (row + 1, col), node.cost + 1)
                 key = hash(next_state)
                 if (key not in explored):
-                    if (self.is_goal_state(child_up)):
+                    if (self.is_goal_state(child)):
                         # goal state reached, need to backtrack
                         print("goal state reached")
                         break
                     else:     
-                        frontier.append(child_up)
+                        frontier.put((child.cost, child))
 
             # DOWN    
             if (row != 0):
@@ -106,15 +108,15 @@ class Puzzle(object):
                 next_state[row - 1][col] = 0
                 next_state[row][col] = number_to_swap
 
-                child_down = Node(next_state, node, "DOWN", (row - 1, col))
+                child = Node(next_state, node, "DOWN", (row - 1, col), node.cost + 1)
                 key = hash(next_state)
                 if (key not in explored):
-                    if (self.is_goal_state(child_down)):
+                    if (self.is_goal_state(child)):
                         # goal state reached, need to backtrack
                         print("goal state reached")
                         break
                     else:     
-                        frontier.append(child_down)
+                        frontier.put((child.cost, child))
 
         return ["LEFT", "RIGHT"]  # sample output
 
@@ -171,11 +173,12 @@ class Puzzle(object):
         return True            
 
 class Node:
-    def __init__(self, curr_state, parent, prev_move, zero_position):
+    def __init__(self, curr_state, parent, prev_move, zero_position, cost):
         self.curr_state = curr_state
         self.parent = parent
         self.prev_move = prev_move
         self.zero_position = zero_position
+        self.cost = cost
 
 
 if __name__ == "__main__":
