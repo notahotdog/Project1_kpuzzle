@@ -166,7 +166,7 @@ class Puzzle(object):
     def is_goal_state(self, state):
         for i in range(self.size):
             for j in range(self.size):
-                if (state[i][j] != self.init_state[i][j]):
+                if (state[i][j] != self.goal_state[i][j]):
                     return False
         return True            
 
