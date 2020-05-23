@@ -1,4 +1,4 @@
-
+'''
 #DEBUG actionGeneration
 #generates the list for the various actions
 
@@ -46,7 +46,7 @@ for i in listActions:
 
   print(swappedlist)
 
-
+'''
 
 '''
 #valid actions debug
@@ -98,7 +98,6 @@ def findZero(state):
 lis = validActions(somelist)
 print(lis)
 '''
-'''
 
 Manhattan distance code - final
 init_state = [1,2,3,4,5,0,6,7,8]
@@ -117,7 +116,6 @@ manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) f
 print("Manhattan distance: ", manhattan_distance)
 
 
-'''
 '''
 for istate, gstate in ((init_state.index(i),goal_state.index(i)) for i in range(0,n):
 manhattan_distance += (abs(istate%n - gstate%n) + abs(istate//n - gstate//n))

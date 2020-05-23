@@ -8,6 +8,7 @@ from copy import deepcopy
 import collections
 import copy
 from itertools import chain
+import time
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
@@ -19,18 +20,23 @@ class Puzzle(object):
         self.init_state = init_state
         self.goal_state = goal_state
         self.actions = []
-        
+        self.einit_state = list(chain.from_iterable(init_state)) #flattens the list
+        self.egoal_state = list(chain.from_iterable(goal_state)) #flattens the list
+
         #self.actions = list()
 
     def astarsearch(self):
 
         #pass the goal state and the initial state
-        self.init_state = list(chain.from_iterable(init_state)) #flattens the list
-        
-        print("Flattened list: ", self.init_state)
+        #self.init_state = list(chain.from_iterable(init_state)) #flattens the list
+        #self.goal_state = list(chain.from_iterable(goal_state)) #flattens the list
+       
+
+        print("Flattened list: ", self.einit_state)
+        print("Flattened list: ", self.egoal_state)
 
 
-        queue = collections.deque([Node(self.init_state,goal_state,0,"N")]) #add the initial state
+        queue = collections.deque([Node(self.einit_state,self.egoal_state,0,"N")]) #add the initial state
         #seen = set()
         #seen.add()
 
@@ -38,13 +44,22 @@ class Puzzle(object):
 
             #sort the deque
             queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore))
+            #debug queue
 
             tempNode = queue.popleft()
-            self.debugNode(tempNode) #node to be assessed
+            self.debugNode(tempNode,"C") #node to be assessed
             self.actions.append(tempNode.actionType) #add to list of actions attempted
 
-            if(self.solved(self.init_state)):
+            seen = set()
+            seen.add(tempNode.state)
+
+            if(tempNode.solved(tempNode.initial_state)):
                 return self.actions #can be changed later on
+            
+
+
+            #if(self.solved(self.init_state)):
+            #    return self.actions #can be changed later on
             
             else:
 
@@ -56,22 +71,37 @@ class Puzzle(object):
                     #create a modified node
                     #modifiedNode = tempNode.actionSwap(i)
                     #newNode = Node(modifiedNode,goal_state,tempNode.inc_g,i)
-                    newNode = Node(tempNode.actionSwap(i),goal_state,tempNode.inc_g,i)
+                    newNode = Node(tempNode.actionSwap(i),self.egoal_state,tempNode.g +1,i)
+                    if newNode.state not in seen:
+                        seen.add(newNode.state)
+                        queue.appendleft(newNode) 
 
-                    queue.appendleft(newNode) 
+
+
+
+    #DEBUGS the contents inside the queue
+    def debugQueue(self,queue):
+        for x in range(queue):
+            debugNode(x,"C")
     
-    #DEBUGS the contents of the node
-    def debugNode(self,node):
+    #DEBUGS the contents of the node s-simple c-complex
+    def debugNode(self,node,eType):
+
         print("")
         print("-------")
         print("DEBUG NODE: ")
-        #print("     -i State:", node.initial_state, " g val: ", node.g, " action: ", node.action)
-        print(" Initial State: ")
-        node.debugMatrix(node.initial_state)
-        print(" g val: ", node.g, " action: ", node.action)
         
+        if eType == "S":
+            print(" Initial State: ")
+            node.debugMatrix(node.initial_state)
+            print(" g val: ", node.g, " action: ", node.action)
 
-        
+        elif eType == "C":
+            print("Node representation:")
+            node.debugMatrix(node.initial_state)
+            print("Node Details:")
+            print(" g val: ", node.g, "fscore val", node.fscore() , "manhattan distance", node.manhattan_distance(), " action: ", node.action)
+
 
     #debug actions allows to check whether the action is in the action list
     def debugActions(self, *args):
@@ -149,15 +179,24 @@ class  Node(object):
 
     def __init__(self, initial_state,goal_state,g,action): #initial state and the g value
         self.initial_state = initial_state
+        self.goal_state = goal_state
+
+
         # you may add more attributes if you think is useful
+        
         self.total_length = len(initial_state) #length of list
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
-        self.g = 0; 
+        self.g = g #this should be an int but somehow its a instance method
+        print("class g type :", type(g))
+        #self.h  = self.manhattan_distance
+        
+        #self.fscore = self.g+ self.h
+
         #type(initial_state)
         self.zeroCoordinates = self.findZeroCoordinates()
         self.action = action #actionType 
         #self.valid_actions = self.validActions()
-
+    
 
     #Takes in a node to be swapped and the direction of the swap
     def actionSwap(self,direction):
@@ -205,25 +244,67 @@ class  Node(object):
 
     def debugMatrix(self,matrix):
         print('\n'.join(' '.join(map(str, matrix[i:i+n])) for i in range(0, len(matrix), n)))
-        
+
+    
+    def state(self):
+        return str(self.initial_state)
+    
+    def debugState(self):
+        print(self.initial_state)
+
+    def solved(self, tempState):
+        print("something")
+        #time.sleep(5.5)    # pause 5.5 seconds
+        print("something") 
+
+
+        return tempState == self.goal_state     
 
     #number of steps taken to get to current state
     def g(self):
-        return g 
-
-    def inc_g(self):
-        self.g += 1
+        return self.g 
 
     #manhattan distance to get to next state
+    '''
     def h(self):
-        return self.manhattan_distance
+        print("Debugging h:")
+        self.debugMatrix(self.initial_state) 
+        self.h = self.manhattan_distance()
+        return self.h
+        #return self.manhattan_distance
+        '''
     
+    def getH(self):
+        return self.manhattan_distance()
+    
+    def getG(self):
+        return self.g
+
     #will calculate the score for a particular heuristic
     def fscore(self):
-        return self.g + self.h
+        self.debugFscore()
+        return self.g + self.getH()
+        #return self.g + self.h
+    
+    def debugFscore(self):
+        print(" F score for ")
+        print("DEBUGGING MATRIX:")
+        self.debugMatrix(self.initial_state)
+        print("g val", self.g)
+        g = self.g
 
+        h = self.getH()
+        print(" G type : ", type(g))
+        print(" H type : ", type(h))
+        ans = g+h
+        print(" => ", )
+        return None
 
-    #def valid_actions(self):
+    def inc_g(self):
+        result = self.g +1
+        return result
+
+        #def valid_actions(self):
     #    return self.valid_actions
 
     def validActions(self):
@@ -271,11 +352,19 @@ class  Node(object):
 
         n = self.nSize
         print("size of n :", n)
-        
-        manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.init_state.index(i), self.goal_state.index(i)) for i in range(0, n+1))) #need to double check the manhattan distance heuristic for accuracy
 
-        #print("Manhattan distance: ", manhattan_distance) 
-        return manhattan_distance
+        print(self.initial_state)
+        print(self.goal_state)
+        
+        #self.debugState()
+        
+        manhattan_distance = 1
+        #manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9))) #need to double check the manhattan distance heuristic for accuracy
+        
+        manhattan_distanceX = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9)))
+
+        print("Manhattan distance: ", manhattan_distance) 
+        return manhattan_distanceX
 
 
 
