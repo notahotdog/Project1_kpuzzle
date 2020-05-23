@@ -62,6 +62,8 @@ class Puzzle(object):
             seen.add(tempNode.state)
 
             if(tempNode.solved(tempNode.initial_state)):
+                print("Puzzle solved, list of actions conducted:")
+                print(self.actions)
                 return self.actions #can be changed later on
             
 
@@ -266,9 +268,9 @@ class  Node(object):
         print(self.initial_state)
 
     def solved(self, tempState):
-        print("something")
-        #time.sleep(5.5)    # pause 5.5 seconds
-        print("something") 
+        print("timer pause")
+        time.sleep(5.5)    # pause 5.5 seconds
+        print("timer pause") 
 
 
         return tempState == self.goal_state     

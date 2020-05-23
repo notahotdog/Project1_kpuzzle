@@ -1,1 +1,1 @@
- python2 CS3243_P1_XX_2.py ./public_tests_component1/input_5.txt ./output/output.txt
+ python2 CS3243_P1_XX_2.py ./public_tests_component1/input_2.txt ./output/output.txt
