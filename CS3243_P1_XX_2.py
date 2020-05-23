@@ -32,39 +32,39 @@ class Puzzle(object):
         #self.goal_state = list(chain.from_iterable(goal_state)) #flattens the list
        
 
-        print("Flattened list: ", self.einit_state)
-        print("Flattened list: ", self.egoal_state)
+        #print("Flattened list: ", self.einit_state)
+        #print("Flattened list: ", self.egoal_state)
 
 
-        queue = collections.deque([Node(self.einit_state,self.egoal_state,0,"N")]) #add the initial state
-        #seen = set()
+        queue = collections.deque([Node(self.einit_state,self.egoal_state,0,"N", None)]) #add the initial state
+        seen = set()
         #seen.add()
 
-        ctr = 0
+        #ctr = 0
         while queue:
 
             #sort the deque
             queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore()))
-            ctr+= 1
-            print("----------------------------------------------------")
-            print("Debug queue of actions :", ctr)
-            self.debugQueue(queue)
-            print("End of debug queue of actions")
-            print("----------------------------------------------------")
+            #ctr += 1
+            #print("----------------------------------------------------")
+            #print("Debug queue of actions :", ctr)
+            #self.debugQueue(queue)
+            #print("End of debug queue of actions")
+            #print("----------------------------------------------------")
 
             #debug queue
 
             tempNode = queue.popleft()
-            self.debugNode(tempNode,"C") #node to be assessed
+            #self.debugNode(tempNode,"C") #node to be assessed
             self.actions.append(tempNode.actionType()) #add to list of actions attempted
 
-            seen = set()
-            seen.add(tempNode.state)
+            #seen = set()
+            seen.add(tempNode.state())
 
             if(tempNode.solved(tempNode.initial_state)):
-                print("Puzzle solved, list of actions conducted:")
-                print(self.actions)
-                return self.actions #can be changed later on
+                #print("Puzzle solved, list of actions conducted:")
+                #print(self.actions)
+                return tempNode #can be changed later on
             
 
 
@@ -75,15 +75,15 @@ class Puzzle(object):
 
                 #create a new node to be added into the queue to be decremented from
                 actionCheck = tempNode.validActions() #all available actions for the node being assessed
-                self.debugActions(actionCheck)
+                #self.debugActions(actionCheck)
 
                 for i in actionCheck:
                     #create a modified node
                     #modifiedNode = tempNode.actionSwap(i)
                     #newNode = Node(modifiedNode,goal_state,tempNode.inc_g,i)
-                    newNode = Node(tempNode.actionSwap(i),self.egoal_state,tempNode.g +1,i)
-                    if newNode.state not in seen:
-                        seen.add(newNode.state)
+                    newNode = Node(tempNode.actionSwap(i),self.egoal_state,tempNode.g +1,i, tempNode)
+                    if newNode.state() not in seen:
+                        #seen.add(newNode.state)
                         queue.appendleft(newNode) 
 
 
@@ -143,8 +143,8 @@ class Puzzle(object):
         
         #need to do solve the puzzle
 
-        path = self.astarsearch() #list of the path traversed    
-        return path    
+        self.backtrack(self.astarsearch()) #Find the goal node and backtrack to obtain the actions   
+        return self.actions   
 
         #return ["LEFT", "RIGHT"] # sample output 
 
@@ -177,6 +177,7 @@ class Puzzle(object):
                     count += 1
         return count
 
+    #count row number (bottom row as 1) that contains the blank
     def find_zero(self, state, n):
         for i in range(n):
             for j in range(n):
@@ -184,7 +185,13 @@ class Puzzle(object):
                     return n - i
 
 
-    
+    def backtrack(self, goalNode):
+        current = goalNode
+        while (current.parent != None):
+            self.actions.append(current.actionType())
+            current = current.parent
+        self.actions.reverse()
+        
     #checks whether puzzle has been solved - need to ensure values inside are equal
     def solved(self, tempState):
         return tempState == self.goal_state     
@@ -192,7 +199,7 @@ class Puzzle(object):
 class  Node(object):
     
 
-    def __init__(self, initial_state,goal_state,g,action): #initial state and the g value
+    def __init__(self, initial_state,goal_state,g,action,parent): #initial state and the g value
         self.initial_state = initial_state
         self.goal_state = goal_state
 
@@ -211,40 +218,41 @@ class  Node(object):
         self.zeroCoordinates = self.findZeroCoordinates()
         self.action = action #actionType 
         #self.valid_actions = self.validActions()
+        self.parent = parent #parent node
     
 
     #Takes in a node to be swapped and the direction of the swap
     def actionSwap(self,direction):
-        print(" ")
+        #print(" ")
         print("actionSwap Initial state:", self.initial_state)
         zval = self.initial_state.index(0)
         nSize = self.nSize
         #modList is the list of actions 
         modList = copy.deepcopy(self.initial_state) #makes a copy of the initial state
         #modList = self.initial_state #list to be modified
-        if(direction == "U"):
-            print("UP")
+        if(direction == "DOWN"):
+            print("DOWN")
             tempval = modList[zval-nSize]
             print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-nSize] = 0
         
-        elif (direction == "D"):
-            print("DOWN")
+        elif (direction == "UP"):
+            print("UP")
             tempval = modList[zval+nSize]
             print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+nSize] = 0
         
-        elif (direction == "R"):
-            print("RIGHT")
+        elif (direction == "LEFT"):
+            print("LEFT")
             tempval = modList[zval+1]
             print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+1] = 0
         
-        elif (direction == "L"):
-            print("LEFT")
+        elif (direction == "RIGHT"):
+            print("RIGHT")
             tempval = modList[zval-1]
             print(" 0 swapped with :", tempval)
             modList[zval] = tempval
@@ -268,8 +276,8 @@ class  Node(object):
         print(self.initial_state)
 
     def solved(self, tempState):
-        print("timer pause")
-        time.sleep(5.5)    # pause 5.5 seconds
+        #print("timer pause")
+        #time.sleep(5.5)    # pause 5.5 seconds
         print("timer pause") 
 
 
@@ -297,7 +305,7 @@ class  Node(object):
 
     #will calculate the score for a particular heuristic
     def fscore(self):
-        self.debugFscore()
+        #self.debugFscore()
         return self.g + self.getH()
         #return self.g + self.h
     
@@ -320,7 +328,7 @@ class  Node(object):
         return result
 
         #def valid_actions(self):
-    #    return self.valid_actions
+        #return self.valid_actions
 
     def validActions(self):
 
@@ -331,13 +339,13 @@ class  Node(object):
         xVal = coordinates[0]
         yVal = coordinates[1]
 
-        valid_actions = ["U","D","L","R"]
+        valid_actions = ["UP","DOWN","LEFT","RIGHT"]
 
         boundary = self.nSize - 1 
-        if(xVal == 0): valid_actions.remove("L")
-        if(xVal == boundary): valid_actions.remove("R")
-        if(yVal == 0): valid_actions.remove("U")
-        if(yVal == boundary): valid_actions.remove("D") 
+        if(xVal == 0): valid_actions.remove("RIGHT")
+        if(xVal == boundary): valid_actions.remove("LEFT")
+        if(yVal == 0): valid_actions.remove("DOWN")
+        if(yVal == boundary): valid_actions.remove("UP") 
 
         return  valid_actions
         #return None
@@ -366,10 +374,10 @@ class  Node(object):
     def manhattan_distance(self):
 
         n = self.nSize
-        print("size of n :", n)
+        #print("size of n :", n)
 
-        print(self.initial_state)
-        print(self.goal_state)
+        #print(self.initial_state)
+        #print(self.goal_state)
         
         #self.debugState()
         
@@ -378,7 +386,7 @@ class  Node(object):
         
         manhattan_distanceX = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9)))
 
-        print("Manhattan distance: ", manhattan_distance) 
+        #print("Manhattan distance: ", manhattan_distance) 
         return manhattan_distanceX
 
 
