@@ -9,6 +9,9 @@ import sys
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 
+# Problems
+# want to use hash function? diff hash function? stringify killing running time. Use a tuple
+# how to handle explored and frontier - need to check in both? -- I think since book algo says to check both, better not disturb this
 
 class Puzzle(object):
     def __init__(self, init_state, goal_state):
@@ -37,10 +40,11 @@ class Puzzle(object):
         if (self.is_goal_state(root.curr_state)):
             return []
 
-        while (not frontier):
+        while (frontier):
             node = frontier.pop(0)
+            # print(node.curr_state)
 
-            hash_num = hash(node.curr_state)
+            hash_num = hash(str(node.curr_state)) # make it a tuple instead of 2d matrix
             explored[hash_num] = node.curr_state
             
             row = node.zero_position[0]
@@ -55,9 +59,9 @@ class Puzzle(object):
                 next_state[row][col] = number_to_swap
 
                 child = Node(next_state, node, "LEFT", (row, col + 1))
-                key = hash(next_state)
-                if (key not in explored):
-                    if (self.is_goal_state(child)):
+                key = hash(str(next_state))
+                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))): 
+                    if (self.is_goal_state(next_state)):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
                     else:     
@@ -72,9 +76,9 @@ class Puzzle(object):
                 next_state[row][col] = number_to_swap
 
                 child = Node(next_state, node, "RIGHT", (row, col - 1))
-                key = hash(next_state)
-                if (key not in explored):
-                    if (self.is_goal_state(child)):
+                key = hash(str(next_state))
+                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
+                    if (self.is_goal_state(next_state)):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
                     else:     
@@ -89,9 +93,9 @@ class Puzzle(object):
                 next_state[row][col] = number_to_swap
 
                 child = Node(next_state, node, "UP", (row + 1, col))
-                key = hash(next_state)
-                if (key not in explored):
-                    if (self.is_goal_state(child)):
+                key = hash(str(next_state))
+                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
+                    if (self.is_goal_state(next_state)):
                         return self.backtrack(child)
                     else:     
                         frontier.append(child)
@@ -105,15 +109,16 @@ class Puzzle(object):
                 next_state[row][col] = number_to_swap
 
                 child = Node(next_state, node, "DOWN", (row - 1, col))
-                key = hash(next_state)
-                if (key not in explored):
-                    if (self.is_goal_state(child)):
+                key = hash(str(next_state))
+                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
+                    if (self.is_goal_state(next_state)):
                         return self.backtrack(child)
                     else:     
                         frontier.append(child)
         
-        return ["UNSOLVABLE"]
+        # return ["UNSOLVABLE"]
         # return ["LEFT", "RIGHT"]  # sample output
+        return self.actions
 
     # you may add more functions if you think is useful
 
@@ -162,11 +167,14 @@ class Puzzle(object):
                     return (i, j)    
     
     def is_goal_state(self, state):
-        # can just directly equate matrices change later
-        for i in range(self.size):
-            for j in range(self.size):
-                if (state[i][j] != self.goal_state[i][j]):
-                    return False
+        # print(goal_state)
+        # print(state == self.goal_state)
+        return state == self.goal_state 
+
+    def not_in_frontier(self, frontier, state):     
+        for node in frontier:
+            if (state == node.curr_state):
+                return False
         return True            
 
 class Node:
