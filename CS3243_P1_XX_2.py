@@ -40,15 +40,23 @@ class Puzzle(object):
         #seen = set()
         #seen.add()
 
+        ctr = 0
         while queue:
 
             #sort the deque
-            queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore))
+            queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore()))
+            ctr+= 1
+            print("----------------------------------------------------")
+            print("Debug queue of actions :", ctr)
+            self.debugQueue(queue)
+            print("End of debug queue of actions")
+            print("----------------------------------------------------")
+
             #debug queue
 
             tempNode = queue.popleft()
             self.debugNode(tempNode,"C") #node to be assessed
-            self.actions.append(tempNode.actionType) #add to list of actions attempted
+            self.actions.append(tempNode.actionType()) #add to list of actions attempted
 
             seen = set()
             seen.add(tempNode.state)
@@ -81,8 +89,13 @@ class Puzzle(object):
 
     #DEBUGS the contents inside the queue
     def debugQueue(self,queue):
-        for x in range(queue):
-            debugNode(x,"C")
+        ctr = 0
+        for x in (queue):
+            ctr+= 1
+            print("****")
+            print("Matrix Order:", ctr)
+            self.debugNode(x,"C")
+            print("****")
     
     #DEBUGS the contents of the node s-simple c-complex
     def debugNode(self,node,eType):
@@ -187,7 +200,7 @@ class  Node(object):
         self.total_length = len(initial_state) #length of list
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = g #this should be an int but somehow its a instance method
-        print("class g type :", type(g))
+        #print("class g type :", type(g))
         #self.h  = self.manhattan_distance
         
         #self.fscore = self.g+ self.h
@@ -287,17 +300,17 @@ class  Node(object):
         #return self.g + self.h
     
     def debugFscore(self):
-        print(" F score for ")
+        print(" F score for :")
         print("DEBUGGING MATRIX:")
         self.debugMatrix(self.initial_state)
         print("g val", self.g)
         g = self.g
 
         h = self.getH()
-        print(" G type : ", type(g))
-        print(" H type : ", type(h))
+        #print(" G type : ", type(g))
+        #print(" H type : ", type(h))
         ans = g+h
-        print(" => ", )
+        print("fscore  => ", ans )
         return None
 
     def inc_g(self):
