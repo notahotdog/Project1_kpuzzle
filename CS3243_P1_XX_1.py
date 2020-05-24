@@ -1,8 +1,5 @@
 # CS3243 Introduction to Artificial Intelligence
 # Project 1: k-Puzzle
-
-import copy
-import os
 # from Queue import PriorityQueue # its queue in Python3, but assignment using Python 2.7
 import sys
 
@@ -11,7 +8,9 @@ import sys
 
 # Problems
 # want to use hash function? diff hash function? stringify killing running time. Use a tuple
-# how to handle explored and frontier - need to check in both? -- I think since book algo says to check both, better not disturb this
+# how to handle explored and frontier - need to check in both?
+# -- I think since book algo says to check both, better not disturb this
+
 
 class Puzzle(object):
     def __init__(self, init_state, goal_state):
@@ -75,7 +74,7 @@ class Puzzle(object):
         # implement your search algorithm here
 
         # Check if puzzle is solvable
-        if (not self.solvable()):
+        if not self.solvable():
             return ["UNSOLVABLE"]
 
         # Initializing root node, frontier, and explored set of nodes
@@ -85,10 +84,10 @@ class Puzzle(object):
         frontier.append(root)
         explored = dict()
 
-        if (self.is_goal_state(root.curr_state)):
+        if self.is_goal_state(root.curr_state):
             return []
 
-        while (frontier):
+        while frontier:
             node = frontier.pop(0)
             # print(node.curr_state)
 
@@ -99,46 +98,45 @@ class Puzzle(object):
             col = node.zero_position[1]
 
             # LEFT
-            if (col != self.size - 1):
+            if col != self.size - 1:
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"LEFT",row,col)
 
                 child = Node(next_state, node, "LEFT", (row, col + 1))
                 key = next_state
-                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
-                    if (self.is_goal_state(next_state)):
+                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                    if self.is_goal_state(next_state):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
-                    else:     
+                    else:
                         frontier.append(child)
-            
+
             # RIGHT
-            if (col != 0):
+            if col != 0:
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"RIGHT",row,col)
 
                 child = Node(next_state, node, "RIGHT", (row, col - 1))
-                # print(next_state)
                 key = next_state
 
-                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
-                    if (self.is_goal_state(next_state)):
+                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                    if self.is_goal_state(next_state):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
-                    else:     
+                    else:
                         frontier.append(child)
 
             # UP
-            if (row != self.size - 1):
+            if row != self.size - 1:
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"UP",row,col)
 
                 child = Node(next_state, node, "UP", (row + 1, col))
                 key = next_state
-                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
-                    if (self.is_goal_state(next_state)):
+                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                    if self.is_goal_state(next_state):
                         return self.backtrack(child)
-                    else:     
+                    else:
                         frontier.append(child)
 
             # DOWN    
@@ -147,16 +145,13 @@ class Puzzle(object):
                 next_state = self.gen_next_state(node.curr_state,"DOWN",row,col)
 
                 child = Node(next_state, node, "DOWN", (row - 1, col))
-                # print(next_state)
                 key = next_state
                 if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
                     if self.is_goal_state(next_state):
                         return self.backtrack(child)
-                    else:     
+                    else:
                         frontier.append(child)
-        
-        # return ["UNSOLVABLE"]
-        # return ["LEFT", "RIGHT"]  # sample output
+
         return ["UNSOLVABLE"]
 
     # you may add more functions if you think is useful
@@ -168,6 +163,7 @@ class Puzzle(object):
     3. If the grid width is even, and the blank is on an odd row counting from the bottom 
     then the number of inversions in a solvable situation is even.
     '''
+
     # returns if an n by n puzzle is solvable
     def solvable(self):
         cpy = []
@@ -176,25 +172,25 @@ class Puzzle(object):
             cpy.extend(self.init_state[i])
         for i in range(self.size**2):
             for j in range(i + 1, self.size**2):
-                if ((cpy[i] > cpy[j]) and (cpy[j] != 0)):
+                if (cpy[i] > cpy[j]) and (cpy[j] != 0):
                     inversions += 1
 
-        if (self.size % 2 == 1 and inversions % 2 == 0):
+        if self.size % 2 == 1 and inversions % 2 == 0:
             return True
-        elif (self.size % 2 == 0):
+        elif self.size % 2 == 0:
             row = self.find_zero()[1] - self.size
-            if (inversions % 2 == 0):
-                if (row % 2 == 1):
+            if inversions % 2 == 0:
+                if row % 2 == 1:
                     return True
             else:
-                if (row % 2 == 0):
+                if row % 2 == 0:
                     return True
         return False
 
     # returns void and adds the prev moves directly onto actions in Puzzle instance
     def backtrack(self, node):
         result = list()
-        while(node.parent != None):
+        while node.parent is not None:
             result.insert(0, node.prev_move)
             node = node.parent
         return result
@@ -202,19 +198,20 @@ class Puzzle(object):
     def find_zero(self):
         for i in range(self.size):
             for j in range(self.size):
-                if (self.init_state[i][j] == 0):
-                    return (i, j)    
-    
+                if self.init_state[i][j] == 0:
+                    return i, j
+
     def is_goal_state(self, state):
         # print(goal_state)
         # print(state == self.goal_state)
         return state == tuple(map(tuple, self.goal_state))
 
-    def not_in_frontier(self, frontier, state):     
+    def not_in_frontier(self, frontier, state):
         for node in frontier:
-            if (state == node.curr_state):
+            if state == node.curr_state:
                 return False
-        return True            
+        return True
+
 
 class Node:
     def __init__(self, curr_state, parent, prev_move, zero_position):
@@ -239,7 +236,7 @@ if __name__ == "__main__":
         raise IOError("Input file not found!")
 
     lines = f.readlines()
-    
+
     # n = num rows in input file
     n = len(lines)
     # max_num = n to the power of 2 - 1
@@ -248,7 +245,7 @@ if __name__ == "__main__":
     # Instantiate a 2D list of size n x n
     init_state = [[0 for i in range(n)] for j in range(n)]
     goal_state = [[0 for i in range(n)] for j in range(n)]
-    
+
 
     i,j = 0, 0
     for line in lines:
@@ -272,7 +269,7 @@ if __name__ == "__main__":
 
     with open(sys.argv[2], 'a') as f:
         for answer in ans:
-            f.write(answer+'\n')            
+            f.write(answer+'\n')
 
 '''
 Code Idea:
