@@ -19,8 +19,56 @@ class Puzzle(object):
         self.init_state = init_state
         self.goal_state = goal_state
         self.size = len(init_state)
-        self.actions = list()
 
+    # generates a new state (tuple) based on current state and the move
+    def gen_next_state(self, curr_state, move, zero_row, zero_col):
+        next_state = []
+        if move == "LEFT" or move == "RIGHT":
+            for row in range(self.size):
+                if row != zero_row:
+                    next_state.append(tuple(curr_state[row]))
+                else:
+                    new_row = list(curr_state[row])
+                    if move == "LEFT":
+                        number_to_swap = new_row[zero_col + 1]
+                        new_row[zero_col + 1] = 0
+                        new_row[zero_col] = number_to_swap
+                    else:
+                        number_to_swap = new_row[zero_col - 1]
+                        new_row[zero_col - 1] = 0
+                        new_row[zero_col] = number_to_swap
+                    next_state.append(tuple(new_row))
+        elif move == "UP":
+            not_yet_swapped = True
+            for row in range(self.size):
+                if row == zero_row or row == zero_row + 1:
+                    if not_yet_swapped:
+                        number_to_swap = curr_state[zero_row + 1][zero_col]
+                        top_row = list(curr_state[zero_row])
+                        bot_row = list(curr_state[zero_row+1])
+                        bot_row[zero_col] = 0
+                        top_row[zero_col] = number_to_swap
+                        next_state.append(tuple(top_row))
+                        next_state.append(tuple(bot_row))
+                        not_yet_swapped = False
+                else:
+                    next_state.append(tuple(curr_state[row]))
+        elif move == "DOWN":
+            not_yet_swapped = True
+            for row in range(self.size):
+                if row == (zero_row - 1) or row == zero_row:
+                    if not_yet_swapped:
+                        number_to_swap = curr_state[zero_row - 1][zero_col]
+                        top_row = list(curr_state[zero_row-1])
+                        bot_row = list(curr_state[zero_row])
+                        bot_row[zero_col] = number_to_swap
+                        top_row[zero_col] = 0
+                        next_state.append(tuple(top_row))
+                        next_state.append(tuple(bot_row))
+                        not_yet_swapped = False
+                else:
+                    next_state.append(tuple(curr_state[row]))
+        return tuple(next_state)
 
     def solve(self):
         # TODO
@@ -32,7 +80,7 @@ class Puzzle(object):
 
         # Initializing root node, frontier, and explored set of nodes
         zero_pos = self.find_zero()
-        root = Node(self.init_state, None, None, zero_pos)
+        root = Node(tuple(map(tuple, self.init_state)), None, None, zero_pos)
         frontier = list()
         frontier.append(root)
         explored = dict()
@@ -44,23 +92,20 @@ class Puzzle(object):
             node = frontier.pop(0)
             # print(node.curr_state)
 
-            hash_num = hash(str(node.curr_state)) # make it a tuple instead of 2d matrix
-            explored[hash_num] = node.curr_state
-            
+            # hash_num = hash(node.curr_state) # make it a tuple instead of 2d matrix
+            explored[node.curr_state] = True
+
             row = node.zero_position[0]
             col = node.zero_position[1]
 
             # LEFT
             if (col != self.size - 1):
                 # getting the next state
-                next_state = copy.deepcopy(node.curr_state)
-                number_to_swap = next_state[row][col + 1]
-                next_state[row][col + 1] = 0
-                next_state[row][col] = number_to_swap
+                next_state = self.gen_next_state(node.curr_state,"LEFT",row,col)
 
                 child = Node(next_state, node, "LEFT", (row, col + 1))
-                key = hash(str(next_state))
-                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))): 
+                key = next_state
+                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
                     if (self.is_goal_state(next_state)):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
@@ -70,13 +115,12 @@ class Puzzle(object):
             # RIGHT
             if (col != 0):
                 # getting the next state
-                next_state = copy.deepcopy(node.curr_state)
-                number_to_swap = next_state[row][col - 1]
-                next_state[row][col - 1] = 0
-                next_state[row][col] = number_to_swap
+                next_state = self.gen_next_state(node.curr_state,"RIGHT",row,col)
 
                 child = Node(next_state, node, "RIGHT", (row, col - 1))
-                key = hash(str(next_state))
+                # print(next_state)
+                key = next_state
+
                 if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
                     if (self.is_goal_state(next_state)):
                         # goal state reached, need to backtrack
@@ -87,13 +131,10 @@ class Puzzle(object):
             # UP
             if (row != self.size - 1):
                 # getting the next state
-                next_state = copy.deepcopy(node.curr_state)
-                number_to_swap = next_state[row + 1][col]
-                next_state[row + 1][col] = 0
-                next_state[row][col] = number_to_swap
+                next_state = self.gen_next_state(node.curr_state,"UP",row,col)
 
                 child = Node(next_state, node, "UP", (row + 1, col))
-                key = hash(str(next_state))
+                key = next_state
                 if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
                     if (self.is_goal_state(next_state)):
                         return self.backtrack(child)
@@ -101,24 +142,22 @@ class Puzzle(object):
                         frontier.append(child)
 
             # DOWN    
-            if (row != 0):
+            if row != 0:
                 # getting the next state
-                next_state = copy.deepcopy(node.curr_state)
-                number_to_swap = next_state[row - 1][col]
-                next_state[row - 1][col] = 0
-                next_state[row][col] = number_to_swap
+                next_state = self.gen_next_state(node.curr_state,"DOWN",row,col)
 
                 child = Node(next_state, node, "DOWN", (row - 1, col))
-                key = hash(str(next_state))
-                if ((key not in explored) and (self.not_in_frontier(frontier, next_state))):
-                    if (self.is_goal_state(next_state)):
+                # print(next_state)
+                key = next_state
+                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                    if self.is_goal_state(next_state):
                         return self.backtrack(child)
                     else:     
                         frontier.append(child)
         
         # return ["UNSOLVABLE"]
         # return ["LEFT", "RIGHT"]  # sample output
-        return self.actions
+        return ["UNSOLVABLE"]
 
     # you may add more functions if you think is useful
 
@@ -169,7 +208,7 @@ class Puzzle(object):
     def is_goal_state(self, state):
         # print(goal_state)
         # print(state == self.goal_state)
-        return state == self.goal_state 
+        return state == tuple(map(tuple, self.goal_state))
 
     def not_in_frontier(self, frontier, state):     
         for node in frontier:
