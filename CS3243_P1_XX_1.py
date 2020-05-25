@@ -16,7 +16,7 @@ class Puzzle(object):
     def __init__(self, init_state, goal_state):
         # you may add more attributes if you think is useful
         self.init_state = init_state
-        self.goal_state = goal_state
+        self.goal_state = tuple(map(tuple, goal_state))
         self.size = len(init_state)
 
     # generates a new state (tuple) based on current state and the move
@@ -25,7 +25,7 @@ class Puzzle(object):
         if move == "LEFT" or move == "RIGHT":
             for row in range(self.size):
                 if row != zero_row:
-                    next_state.append(tuple(curr_state[row]))
+                    next_state.append(curr_state[row])
                 else:
                     new_row = list(curr_state[row])
                     if move == "LEFT":
@@ -51,7 +51,7 @@ class Puzzle(object):
                         next_state.append(tuple(bot_row))
                         not_yet_swapped = False
                 else:
-                    next_state.append(tuple(curr_state[row]))
+                    next_state.append(curr_state[row])
         elif move == "DOWN":
             not_yet_swapped = True
             for row in range(self.size):
@@ -66,7 +66,7 @@ class Puzzle(object):
                         next_state.append(tuple(bot_row))
                         not_yet_swapped = False
                 else:
-                    next_state.append(tuple(curr_state[row]))
+                    next_state.append(curr_state[row])
         return tuple(next_state)
 
     def solve(self):
@@ -98,13 +98,13 @@ class Puzzle(object):
             col = node.zero_position[1]
 
             # LEFT
-            if col != self.size - 1:
+            if col != self.size - 1 and node.prev_move != "RIGHT":
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"LEFT",row,col)
 
                 child = Node(next_state, node, "LEFT", (row, col + 1))
                 key = next_state
-                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                if key not in explored:
                     if self.is_goal_state(next_state):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
@@ -112,14 +112,14 @@ class Puzzle(object):
                         frontier.append(child)
 
             # RIGHT
-            if col != 0:
+            if col != 0 and node.prev_move != "LEFT":
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"RIGHT",row,col)
 
                 child = Node(next_state, node, "RIGHT", (row, col - 1))
                 key = next_state
 
-                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                if key not in explored:
                     if self.is_goal_state(next_state):
                         # goal state reached, need to backtrack
                         return self.backtrack(child)
@@ -127,26 +127,26 @@ class Puzzle(object):
                         frontier.append(child)
 
             # UP
-            if row != self.size - 1:
+            if row != self.size - 1 and node.prev_move != "DOWN":
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"UP",row,col)
 
                 child = Node(next_state, node, "UP", (row + 1, col))
                 key = next_state
-                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                if key not in explored:
                     if self.is_goal_state(next_state):
                         return self.backtrack(child)
                     else:
                         frontier.append(child)
 
             # DOWN    
-            if row != 0:
+            if row != 0 and node.prev_move != "UP":
                 # getting the next state
                 next_state = self.gen_next_state(node.curr_state,"DOWN",row,col)
 
                 child = Node(next_state, node, "DOWN", (row - 1, col))
                 key = next_state
-                if (key not in explored) and (self.not_in_frontier(frontier, next_state)):
+                if key not in explored:
                     if self.is_goal_state(next_state):
                         return self.backtrack(child)
                     else:
@@ -204,14 +204,7 @@ class Puzzle(object):
     def is_goal_state(self, state):
         # print(goal_state)
         # print(state == self.goal_state)
-        return state == tuple(map(tuple, self.goal_state))
-
-    def not_in_frontier(self, frontier, state):
-        for node in frontier:
-            if state == node.curr_state:
-                return False
-        return True
-
+        return state == self.goal_state
 
 class Node:
     def __init__(self, curr_state, parent, prev_move, zero_position):
