@@ -35,7 +35,7 @@ class Puzzle(object):
             queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore())) #sorts the queue 
             ctr+= 1
             
-            self.debugQueue(queue,ctr)
+            ##self.debugQueue(queue,ctr)
 
             tempNode = queue.popleft()
             #self.debugNode(tempNode,"C") #node to be assessed
@@ -50,7 +50,7 @@ class Puzzle(object):
             else:
 
                 actionCheck = tempNode.validActions() #all available actions for the node being assessed "U,D,L,R"
-                self.debugActions(actionCheck)
+                #self.debugActions(actionCheck)
 
                 #creates child nodes based on list of available actions
                 for i in actionCheck:
@@ -75,7 +75,7 @@ class Puzzle(object):
             ctr2+= 1
             print("****")
             print("Matrix Order:", ctr2)
-            self.debugNode(x,"C")
+            ##self.debugNode(x,"C")
             print("****")
 
         print("End of debug queue of actions")
@@ -200,8 +200,8 @@ class  Node(object):
     #Takes in a node to be swapped and the direction of the swap
     def actionSwap(self,direction):
         
-        print(" ")
-        print(" Initial state before actionSwap:", self.initial_state)
+        ##print(" ")
+        ##print(" Initial state before actionSwap:", self.initial_state)
 
         zval = self.zeroCoordinates[0] + (self.nSize * self.zeroCoordinates[1])
         nSize = self.nSize
@@ -237,7 +237,7 @@ class  Node(object):
             modList[zval-1] = 0
 
         #print(" Updated Matrix after actionSwap: ")
-        #self.debugMatrix(modList)
+        ##self.debugMatrix(modList)
         return modList
         
     def actionType(self):
@@ -278,14 +278,14 @@ class  Node(object):
     
     #will calculate the score for a particular heuristic
     def fscore(self):
-        #self.debugFscore()
+        ##self.debugFscore()
         return self.g + self.getH()
     
     #prints the f/g/h score for a state
     def debugFscore(self):
         print(" F score for :")
         print("DEBUGGING MATRIX:")
-        self.debugMatrix(self.initial_state)
+        ##self.debugMatrix(self.initial_state)
 
         g = self.g
         h = self.getH()
@@ -349,7 +349,7 @@ class  Node(object):
         n = self.nSize
 
         
-        #self.debugState()
+        ##self.debugState()
         
         if (self.parent == None):
             #compute for start state
