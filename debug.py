@@ -98,9 +98,10 @@ def findZero(state):
 lis = validActions(somelist)
 print(lis)
 '''
-
-Manhattan distance code - final
-init_state = [1,2,3,4,5,0,6,7,8]
+'''
+import math
+#Manhattan distance code - final
+init_state = [1,2,3,4,5,0,7,8,6]
 goal_state = [1,2,3,4,5,6,7,8,0]
 
 n = int(abs(math.sqrt(len(init_state)))) 
@@ -109,13 +110,62 @@ print("size of n :", n)
 manhattan_distance = 0
 count = 0
 
-manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((init_state.index(i), goal_state.index(i)) for i in range(0, 9)))
+
+for i in range(0,9):
+  istate = init_state.index(i)
+  gstate = goal_state.index(i)
+
+  print("istate value :", istate)
+  print("gstate value :", gstate)
+
+  if((istate) == 0):
+    continue
+  manhattan_distance += (abs(istate%n - gstate%n) + abs(istate//n - gstate//n))
+
 
 #manhattan_distance = sum(abs(b%3 - g%3) + abs(b//3 - g//3) for b, g in ((init_state.index(i), goal_state.index(i)) for i in range(0, 9)))
+'''
+'''
+#initial_state = [1,5,3,4,2,6,7,8,0]
+#goal_state = [0,1,2,3,4,5,6,7,8]
+#initial_state = [3,1,2,0,4,5,6,7,8]
+def calculateManhattan(initial_state):
+    initial_config = initial_state
+    manDict = 0
+    for i,item in enumerate(initial_config):
+        prev_row,prev_col = int(i/ 3) , i % 3
+        goal_row,goal_col = int(item /3),item % 3
+        manDict += abs(prev_row-goal_row) + abs(prev_col - goal_col)
+    return manDict
+print("mDict: ",calculateManhattan(initial_state))
 
-print("Manhattan distance: ", manhattan_distance)
+'''
 
+import math
+init_state = [1,2,3,4,5,0,7,8,6]
+goal_state = [1,5,3,4,2,6,7,8,0]
 
+def manhatan_dist(board,goal_stat):
+    #Manhattan priority function. The sum of the Manhattan distances 
+    #(sum of the vertical and horizontal distance) from the blocks to their goal positions, 
+    #plus the number of moves made so far to get to the search node.
+    b = board
+    g = goal_stat
+
+    manh_dist = 0
+    for i in range (0,3,1):
+        for j in range (0,3,1):
+            bij = b[i][j]
+            i_b = i
+            j_b = j
+
+            i_g, j_g = value_index(g,bij) 
+
+            manh_dist += (math.fabs(i_g - i_b) + math.fabs(j_g - j_b))
+
+    print("mandict: ", manh_dist)
+
+manhatan_dist(init_state,goal_state)
 '''
 for istate, gstate in ((init_state.index(i),goal_state.index(i)) for i in range(0,n):
 manhattan_distance += (abs(istate%n - gstate%n) + abs(istate//n - gstate//n))

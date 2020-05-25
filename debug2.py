@@ -20,25 +20,39 @@ class Puzzle(object):
         self.init_state = init_state
         self.goal_state = goal_state
         self.actions = []
-        self.einit_state = list(chain.from_iterable(init_state)) #converts nxn matrix to list format [[],[],[]] -> []
-        self.egoal_state = list(chain.from_iterable(goal_state)) 
-        
+        self.einit_state = list(chain.from_iterable(init_state)) #flattens the list
+        self.egoal_state = list(chain.from_iterable(goal_state)) #flattens the list
 
-    #return a list based on the path traversed to reach the goal state
+        #self.actions = list()
+
     def astarsearch(self):
 
-        queue = collections.deque([Node(self.einit_state,self.egoal_state,0,"N")]) #adds the initial state
+        #pass the goal state and the initial state
+        #self.init_state = list(chain.from_iterable(init_state)) #flattens the list
+        #self.goal_state = list(chain.from_iterable(goal_state)) #flattens the list
+       
+
+        print("Flattened list: ", self.einit_state)
+        print("Flattened list: ", self.egoal_state)
+
+
+        queue = collections.deque([Node(self.einit_state,self.egoal_state,0,"N")]) #add the initial state
+        #seen = set()
+        #seen.add()
 
         ctr = 0
         while queue:
 
-            queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore())) #sorts the queue 
+            #sort the deque
+            queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore()))
             ctr+= 1
             print("----------------------------------------------------")
             print("Debug queue of actions :", ctr)
             self.debugQueue(queue)
             print("End of debug queue of actions")
             print("----------------------------------------------------")
+
+            #debug queue
 
             tempNode = queue.popleft()
             self.debugNode(tempNode,"C") #node to be assessed
@@ -48,32 +62,34 @@ class Puzzle(object):
             seen.add(tempNode.state)
 
             if(tempNode.solved(tempNode.initial_state)):
-                self.debugSolved()
-                #print("Puzzle solved, list of actions conducted:")
-                #print(self.actions)
-                return self.actions 
+                print("Puzzle solved, list of actions conducted:")
+                print(self.actions)
+                return self.actions #can be changed later on
             
-            #create a new node to be added into the queue to be decremented from
+
+
+            #if(self.solved(self.init_state)):
+            #    return self.actions #can be changed later on
+            
             else:
 
-                actionCheck = tempNode.validActions() #all available actions for the node being assessed "U,D,L,R"
+                #create a new node to be added into the queue to be decremented from
+                actionCheck = tempNode.validActions() #all available actions for the node being assessed
                 self.debugActions(actionCheck)
 
-                #creates child nodes based on list of available actions
                 for i in actionCheck:
-                    newNode = Node(tempNode.actionSwap(i),self.egoal_state,tempNode.g +1,i) 
+                    #create a modified node
+                    #modifiedNode = tempNode.actionSwap(i)
+                    #newNode = Node(modifiedNode,goal_state,tempNode.inc_g,i)
+                    newNode = Node(tempNode.actionSwap(i),self.egoal_state,tempNode.g +1,i)
                     if newNode.state not in seen:
                         seen.add(newNode.state)
                         queue.appendleft(newNode) 
 
-    #Prints out PATH undertaken to reach goal state
-    def debugSolved(self):
-        print("Puzzle solved, list of actions conducted:")
-        print(self.actions)
-        return None
 
 
-    #DEBUGS the contents inside of the queue
+
+    #DEBUGS the contents inside the queue
     def debugQueue(self,queue):
         ctr = 0
         for x in (queue):
@@ -84,8 +100,6 @@ class Puzzle(object):
             print("****")
     
     #DEBUGS the contents of the node s-simple c-complex
-    #Takes in two parameters, the node to be assessed and the type of details the user desires
-    #"S" => simple debug , "C" => more thorough details
     def debugNode(self,node,eType):
 
         print("")
@@ -104,9 +118,7 @@ class Puzzle(object):
             print(" g val: ", node.g, "fscore val", node.fscore() , "manhattan distance", node.manhattan_distance(), " action: ", node.action)
 
 
-    #Allows for two types of functionality (bad practise ik)
-    #1.If 0 arguments -> Prints out the PATH that the algo traversed to reach the node
-    #2.If 1 arguments ->
+    #debug actions allows to check whether the action is in the action list
     def debugActions(self, *args):
         print("DEBUG: ")
         if len(args) == 0:
@@ -119,6 +131,9 @@ class Puzzle(object):
             actionCheck = args[0]
             print(actionCheck)
 
+#            for x in actionCheck:
+#                print(x)
+
 
     def solve(self):
         #TODO
@@ -126,9 +141,12 @@ class Puzzle(object):
         if (not self.solvable()):
             return ["UNSOLVABLE"]
         
+        #need to do solve the puzzle
 
-        path = self.astarsearch()  #a star returns the list of path traversed
+        path = self.astarsearch() #list of the path traversed    
         return path    
+
+        #return ["LEFT", "RIGHT"] # sample output 
 
 
     # you may add more functions if you think is useful
@@ -167,14 +185,14 @@ class Puzzle(object):
 
 
     
-    #Returns whether or not the puzzle has been solved 
+    #checks whether puzzle has been solved - need to ensure values inside are equal
     def solved(self, tempState):
         return tempState == self.goal_state     
 
-#Node class 
-#Takes in 4 arguments - initial state, goal state, the path cost, action undertaken to reach that node
 class  Node(object):
-    def __init__(self, initial_state,goal_state,g,action): 
+    
+
+    def __init__(self, initial_state,goal_state,g,action): #initial state and the g value
         self.initial_state = initial_state
         self.goal_state = goal_state
 
@@ -184,56 +202,61 @@ class  Node(object):
         self.total_length = len(initial_state) #length of list
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = g #this should be an int but somehow its a instance method
+        #print("class g type :", type(g))
+        #self.h  = self.manhattan_distance
+        
+        #self.fscore = self.g+ self.h
 
+        #type(initial_state)
         self.zeroCoordinates = self.findZeroCoordinates()
         self.action = action #actionType 
+        #self.valid_actions = self.validActions()
     
 
     #Takes in a node to be swapped and the direction of the swap
     def actionSwap(self,direction):
         print(" ")
-        print(" Initial state before actionSwap:", self.initial_state)
+        print("actionSwap Initial state:", self.initial_state)
         zval = self.initial_state.index(0)
         nSize = self.nSize
-
-        modList = copy.deepcopy(self.initial_state) 
-
+        #modList is the list of actions 
+        modList = copy.deepcopy(self.initial_state) #makes a copy of the initial state
+        #modList = self.initial_state #list to be modified
         if(direction == "U"):
             print("UP")
             tempval = modList[zval-nSize]
-            #print(" 0 swapped with :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-nSize] = 0
         
         elif (direction == "D"):
             print("DOWN")
             tempval = modList[zval+nSize]
-            #print(" 0 swapped with :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+nSize] = 0
         
         elif (direction == "R"):
             print("RIGHT")
             tempval = modList[zval+1]
-            #print(" 0 swapped with :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+1] = 0
         
         elif (direction == "L"):
             print("LEFT")
             tempval = modList[zval-1]
-            #print(" 0 swapped with :", tempval)
+            print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-1] = 0
 
-        print(" Updated Matrix after actionSwap: ")
+        print(" updated Matrix: ")
         self.debugMatrix(modList)
         return modList
         
     def actionType(self):
         return self.action
 
-    #prints out the matrix 
     def debugMatrix(self,matrix):
         print('\n'.join(' '.join(map(str, matrix[i:i+n])) for i in range(0, len(matrix), n)))
 
@@ -245,49 +268,64 @@ class  Node(object):
         print(self.initial_state)
 
     def solved(self, tempState):
-        #self.timerPause(5.5) # Uncomment if you want to slow down the execution
+        print("timer pause")
+        #time.sleep(5.5)    # pause 5.5 seconds
+        print("timer pause") 
+
+
         return tempState == self.goal_state     
 
-    #Insert time Pauses to allow for readability
-    #takes in n - length of time for a pause
-    def timerPause(self,n):
-            print("Timer pause start". n)
-            time.sleep(n) #pauses timer for n seconds
-            print("Timer pause start". n)
-
-    #Path cost 
+    #number of steps taken to get to current state
     def g(self):
         return self.g 
 
+    #manhattan distance to get to next state
+    '''
+    def h(self):
+        print("Debugging h:")
+        self.debugMatrix(self.initial_state) 
+        self.h = self.manhattan_distance()
+        return self.h
+        #return self.manhattan_distance
+        '''
+    
     def getH(self):
-
-        #TODO - IMPLEMENT HEURISTIC function
-
         return self.manhattan_distance()
     
+    def getG(self):
+        return self.g
+
     #will calculate the score for a particular heuristic
     def fscore(self):
         self.debugFscore()
         return self.g + self.getH()
+        #return self.g + self.h
     
-    #prints the f/g/h score for a state
     def debugFscore(self):
         print(" F score for :")
         print("DEBUGGING MATRIX:")
         self.debugMatrix(self.initial_state)
-
+        print("g val", self.g)
         g = self.g
+
         h = self.getH()
-
+        #print(" G type : ", type(g))
+        #print(" H type : ", type(h))
         ans = g+h
-
-        print("g val: ", g)
-        print("h val: ", h)
-        print("fscore => ", ans )
+        print("fscore  => ", ans )
         return None
 
-    #returns the list of valid actions for a node
+    def inc_g(self):
+        result = self.g +1
+        return result
+
+        #def valid_actions(self):
+    #    return self.valid_actions
+
     def validActions(self):
+
+        #temp_copy = copy.deepcopy(init_state) #makes a copy of the initial state
+        #coordinates = findZeroCoordinates(temp_copy)
 
         coordinates = self.zeroCoordinates
         xVal = coordinates[0]
@@ -302,7 +340,10 @@ class  Node(object):
         if(yVal == boundary): valid_actions.remove("D") 
 
         return  valid_actions
+        #return None
+        #return valid_actions
 
+    
     #returns a pair that indicates the x and y of 0
     def findZeroCoordinates(self):
         somelist = self.initial_state
@@ -332,6 +373,7 @@ class  Node(object):
         
         #self.debugState()
         
+        manhattan_distance = 1
         #manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9))) #need to double check the manhattan distance heuristic for accuracy
         
         manhattan_distanceX = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9)))
