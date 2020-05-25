@@ -34,15 +34,11 @@ class Puzzle(object):
         while queue:
             queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore())) #sorts the queue 
             ctr+= 1
-            print("----------------------------------------------------")
-            print("Debug queue of actions :", ctr)
-            self.debugQueue(queue)
-            print("End of debug queue of actions")
-            print("----------------------------------------------------")
+            
+            self.debugQueue(queue,ctr)
 
             tempNode = queue.popleft()
             #self.debugNode(tempNode,"C") #node to be assessed
-            #self.actions.append(tempNode.actionType()) #add to list of actions attempted
 
             seen.add(tempNode.state())
 
@@ -60,7 +56,6 @@ class Puzzle(object):
                 for i in actionCheck:
                    newNode = Node(tempNode.actionSwap(i),self.egoal_state,tempNode.g +1,i, tempNode)
                    if newNode.state() not in seen:
-                        #seen.add(newNode.state)
                         queue.appendleft(newNode) 
 
     #Prints out PATH undertaken to reach goal state
@@ -71,15 +66,22 @@ class Puzzle(object):
 
 
     #DEBUGS the contents inside of the queue
-    def debugQueue(self,queue):
-        ctr = 0
+    def debugQueue(self,queue,ctr1):
+        print("----------------------------------------------------")
+        print("Debug queue of actions :", ctr1)
+
+        ctr2 = 0
         for x in (queue):
-            ctr+= 1
+            ctr2+= 1
             print("****")
-            print("Matrix Order:", ctr)
+            print("Matrix Order:", ctr2)
             self.debugNode(x,"C")
             print("****")
-    
+
+        print("End of debug queue of actions")
+        print("----------------------------------------------------")
+
+   
     #DEBUGS the contents of the node s-simple c-complex
     #Takes in two parameters, the node to be assessed and the type of details the user desires
     #"S" => simple debug , "C" => more thorough details
@@ -248,8 +250,11 @@ class  Node(object):
     def state(self):
         return str(self.initial_state)
     
+        #Prints out the relevant values for the states
     def debugState(self):
+        print("size of n :", n)
         print(self.initial_state)
+        print(self.goal_state)
 
     def solved(self, tempState):
         #self.timerPause(5.5) # Uncomment if you want to slow down the execution
@@ -342,9 +347,6 @@ class  Node(object):
         
         n = self.nSize
 
-        #print("size of n :", n)
-        #print(self.initial_state)
-        #print(self.goal_state)
         
         #self.debugState()
         
