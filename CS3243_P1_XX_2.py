@@ -56,7 +56,7 @@ class Puzzle(object):
 
             tempNode = queue.popleft()
             #self.debugNode(tempNode,"C") #node to be assessed
-            self.actions.append(tempNode.actionType()) #add to list of actions attempted
+            #self.actions.append(tempNode.actionType()) #add to list of actions attempted
 
             #seen = set()
             seen.add(tempNode.state())
@@ -115,7 +115,8 @@ class Puzzle(object):
             print("Node representation:")
             node.debugMatrix(node.initial_state)
             print("Node Details:")
-            print(" g val: ", node.g, "fscore val", node.fscore() , "manhattan distance", node.manhattan_distance(), " action: ", node.action)
+            print(" g val: ", node.g, "fscore val", node.fscore() , "manhattan distance", node.getH(), " action: ", node.action)
+            print("Zero position: (", node.zeroCoordinates[0], ",", node.zeroCoordinates[1], ")")
 
 
     #debug actions allows to check whether the action is in the action list
@@ -167,13 +168,10 @@ class Puzzle(object):
 
 
     def count_inv(self, n):
-        cpy = []
         count = 0
-        for i in range(n):
-            cpy.extend(self.init_state[i])
         for i in range(n*n):
             for j in range(i + 1, n*n):
-                if ((cpy[i] > cpy[j]) and (cpy[j] != 0)):
+                if ((self.einit_state[i] > self.einit_state[j]) and (self.einit_state[j] != 0)):
                     count += 1
         return count
 
@@ -187,9 +185,9 @@ class Puzzle(object):
 
     def backtrack(self, goalNode):
         current = goalNode
-        while (current.parent != None):
+        while (current.getParent() != None):
             self.actions.append(current.actionType())
-            current = current.parent
+            current = current.getParent()
         self.actions.reverse()
         
     #checks whether puzzle has been solved - need to ensure values inside are equal
@@ -210,56 +208,57 @@ class  Node(object):
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = g #this should be an int but somehow its a instance method
         #print("class g type :", type(g))
-        #self.h  = self.manhattan_distance
         
         #self.fscore = self.g+ self.h
 
-        #type(initial_state)
-        self.zeroCoordinates = self.findZeroCoordinates()
         self.action = action #actionType 
         #self.valid_actions = self.validActions()
         self.parent = parent #parent node
+        #type(initial_state)
+        self.zeroCoordinates = self.findZeroCoordinates()
+        self.h = self.manhattan_distance()
     
 
     #Takes in a node to be swapped and the direction of the swap
     def actionSwap(self,direction):
         #print(" ")
-        print("actionSwap Initial state:", self.initial_state)
-        zval = self.initial_state.index(0)
+        #print("actionSwap Initial state:", self.initial_state)
+        #zval = self.initial_state.index(0)
+        zval = self.zeroCoordinates[0] + (self.nSize * self.zeroCoordinates[1])
         nSize = self.nSize
         #modList is the list of actions 
         modList = copy.deepcopy(self.initial_state) #makes a copy of the initial state
         #modList = self.initial_state #list to be modified
         if(direction == "DOWN"):
-            print("DOWN")
+            #print("DOWN")
             tempval = modList[zval-nSize]
-            print(" 0 swapped with :", tempval)
+            #print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-nSize] = 0
         
         elif (direction == "UP"):
-            print("UP")
+            #print("UP")
             tempval = modList[zval+nSize]
-            print(" 0 swapped with :", tempval)
+            #print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+nSize] = 0
         
         elif (direction == "LEFT"):
-            print("LEFT")
+            #print("LEFT")
             tempval = modList[zval+1]
-            print(" 0 swapped with :", tempval)
+            #print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval+1] = 0
         
         elif (direction == "RIGHT"):
-            print("RIGHT")
+            #print("RIGHT")
             tempval = modList[zval-1]
-            print(" 0 swapped with :", tempval)
+            #print(" 0 swapped with :", tempval)
             modList[zval] = tempval
             modList[zval-1] = 0
 
-        print(" updated Matrix: ")
-        self.debugMatrix(modList)
+        #print(" updated Matrix: ")
+        #self.debugMatrix(modList)
         return modList
         
     def actionType(self):
@@ -278,8 +277,7 @@ class  Node(object):
     def solved(self, tempState):
         #print("timer pause")
         #time.sleep(5.5)    # pause 5.5 seconds
-        print("timer pause") 
-
+        #print("timer pause") 
 
         return tempState == self.goal_state     
 
@@ -298,7 +296,8 @@ class  Node(object):
         '''
     
     def getH(self):
-        return self.manhattan_distance()
+        #return self.manhattan_distance()
+        return self.h
     
     def getG(self):
         return self.g
@@ -354,21 +353,35 @@ class  Node(object):
     
     #returns a pair that indicates the x and y of 0
     def findZeroCoordinates(self):
-        somelist = self.initial_state
-        xCtr = 0
-        yCtr = 0
+        if (self.parent == None):
+            somelist = self.initial_state
+            xCtr = 0
+            yCtr = 0
 
-        for x in range(self.total_length):
-            if(xCtr == self.nSize): #nSize == 3 
-                yCtr += 1
-                xCtr = 0 
-            
-            if(somelist[x] == 0):
-                break
-            xCtr += 1
-        return xCtr,yCtr
-            
+            for x in range(self.total_length):
+                if(xCtr == self.nSize): #nSize == 3 
+                    yCtr += 1
+                    xCtr = 0 
+    
+                if(somelist[x] == 0):
+                        break
+                xCtr += 1        
+            return xCtr,yCtr
+        else:
+            xPos = self.parent.zeroCoordinates[0]
+            yPos = self.parent.zeroCoordinates[1]
+            if (self.actionType() == "UP"):
+                yPos += 1
+            elif (self.actionType() == "DOWN"):
+                yPos -= 1
+            elif (self.actionType() == "LEFT"):
+                xPos += 1
+            else:
+                xPos -= 1
+            return xPos,yPos
 
+    def getParent(self):
+        return self.parent
 
     #might need to modify code to compare against the 2 states instead of inital.self state and goal state.
     def manhattan_distance(self):
@@ -381,11 +394,51 @@ class  Node(object):
         
         #self.debugState()
         
-        manhattan_distance = 1
+        #manhattan_distance = 1
         #manhattan_distance = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9))) #need to double check the manhattan distance heuristic for accuracy
-        
-        manhattan_distanceX = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(0, 9)))
-
+        if (self.parent == None):
+            #compute for start state
+            manhattan_distanceX = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(1, n**2)))
+        else:
+            #zeroCoordinate of current state contains number that was moved in parent node's initial_state
+            nX = self.zeroCoordinates[0]
+            nY = self.zeroCoordinates[1]
+            numIndex = (nY * n) + nX
+            num = self.parent.initial_state[numIndex]
+            #Find the coordinates of num in the goal state
+            gX = (num - 1) % n
+            gY = (num - 1) // n
+            manhattan_distanceX = self.parent.getH()
+            if (self.action == "UP"):
+                if (gY >= nY):
+                    #Moved num up even though goal is below
+                    manhattan_distanceX += 1
+                else:
+                    #Moved num towards goal
+                    manhattan_distanceX -= 1
+            elif (self.action == "DOWN"):
+                if (gY <= nY):
+                    #Moved num down even though goal is above
+                    manhattan_distanceX += 1
+                else:
+                    #Moved num towards goal
+                    manhattan_distanceX -= 1
+            elif (self.action == "LEFT"):
+                if (gX >= nX):
+                    #moved num left even though goal is right
+                    manhattan_distanceX += 1
+                else:
+                    #Moved num towards goal
+                    manhattan_distanceX -= 1
+            else:
+                #Action is RIGHT
+                if (gX <= nX):
+                    #Moved num right even though goal is left
+                    manhattan_distanceX += 1
+                else:
+                    #Moved num towards goal
+                    manhattan_distanceX -= 1
+            
         #print("Manhattan distance: ", manhattan_distance) 
         return manhattan_distanceX
 
