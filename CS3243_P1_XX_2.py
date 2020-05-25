@@ -30,7 +30,7 @@ class Puzzle(object):
 
         queue = collections.deque([Node(self.einit_state,self.egoal_state,0,"N", None)]) #add the initial state
         seen = set()
-        #ctr = 0
+        ctr = 0
         while queue:
             queue = collections.deque(sorted(list(queue), key= lambda node: node.fscore())) #sorts the queue 
             ctr+= 1
@@ -187,13 +187,14 @@ class  Node(object):
 
         # you may add more attributes if you think is useful
         
+        self.action = action #actionType 
+        self.parent = parent
         self.total_length = len(initial_state) 
         self.nSize = int(abs(math.sqrt(len(initial_state)))) #n definition of matrix
         self.g = g 
-        self.h = self.manhattan_distance()
+
         self.zeroCoordinates = self.findZeroCoordinates()
-        self.action = action #actionType 
-        self.parent = parent
+        self.h = self.manhattan_distance()
     
 
     #Takes in a node to be swapped and the direction of the swap
@@ -395,55 +396,6 @@ class  Node(object):
             
         #print("Manhattan distance: ", manhattan_distance) 
         return manhattan_distanceX
-
-
-        if (self.parent == None):
-            #compute for start state
-            manhattan_distanceX = sum(abs(istate%n - gstate%n) + abs(istate//n - gstate//n) for istate, gstate in ((self.initial_state.index(i), self.goal_state.index(i)) for i in range(1, n**2)))
-
-        else:
-            #zeroCoordinate of current state contains number that was moved in parent node's initial_state
-            nX = self.zeroCoordinates[0]
-            nY = self.zeroCoordinates[1]
-            numIndex = (nY * n) + nX
-            num = self.parent.initial_state[numIndex]
-            #Find the coordinates of num in the goal state
-            gX = (num - 1) % n
-            gY = (num - 1) // n
-            manhattan_distanceX = self.parent.getH()
-            if (self.action == "UP"):
-                if (gY >= nY):
-                    #Moved num up even though goal is below
-                    manhattan_distanceX += 1
-                else:
-                    #Moved num towards goal
-                    manhattan_distanceX -= 1
-            elif (self.action == "DOWN"):
-                if (gY <= nY):
-                    #Moved num down even though goal is above
-                    manhattan_distanceX += 1
-                else:
-                    #Moved num towards goal
-                    manhattan_distanceX -= 1
-            elif (self.action == "LEFT"):
-                if (gX >= nX):
-                    #moved num left even though goal is right
-                    manhattan_distanceX += 1
-                else:
-                    #Moved num towards goal
-                    manhattan_distanceX -= 1
-            else:
-                #Action is RIGHT
-                if (gX <= nX):
-                    #Moved num right even though goal is left
-                    manhattan_distanceX += 1
-                else:
-                    #Moved num towards goal
-                    manhattan_distanceX -= 1
-            
-
-        return manhattan_distanceX
-    
 
     
             
