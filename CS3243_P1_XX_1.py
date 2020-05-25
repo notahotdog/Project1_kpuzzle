@@ -1,6 +1,7 @@
 # CS3243 Introduction to Artificial Intelligence
 # Project 1: k-Puzzle
 # from Queue import PriorityQueue # its queue in Python3, but assignment using Python 2.7
+import collections
 import sys
 
 # Running script on your own - given code can be run with the command:
@@ -80,7 +81,7 @@ class Puzzle(object):
         # Initializing root node, frontier, and explored set of nodes
         zero_pos = self.find_zero()
         root = Node(tuple(map(tuple, self.init_state)), None, None, zero_pos)
-        frontier = list()
+        frontier = collections.deque()
         frontier.append(root)
         explored = dict()
 
@@ -88,7 +89,7 @@ class Puzzle(object):
             return []
 
         while frontier:
-            node = frontier.pop(0)
+            node = frontier.popleft()
             # print(node.curr_state)
 
             # hash_num = hash(node.curr_state) # make it a tuple instead of 2d matrix
